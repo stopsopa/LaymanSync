@@ -6,9 +6,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * Finds the absolute path to the requested binary within the 'bin' directory.
+ * Finds the absolute path to the single binary within the 'bin' directory.
+ * Expects exactly 1 file in total within the 'bin' directory structure.
+ * 
+ * /bin/ts.sh electron/src/tools/determineBinaryAbsolutePath.ts
  */
-export function determineBinaryAbsolutePath(binaryName: "ffmpeg" | "ffprobe", searchDir?: string): string {
+export function determineBinaryAbsolutePath(searchDir?: string): string {
   // If searchDir is not provided, we look for 'bin' two levels up from this tool
   // which matches electron/bin/ when the tool is in electron/src/tools/
   const binDir = searchDir || path.join(__dirname, "..", "..", "bin");
@@ -31,28 +34,17 @@ export function determineBinaryAbsolutePath(binaryName: "ffmpeg" | "ffprobe", se
         allFiles.push(fullPath);
       }
     }
-  }; 
+  };
 
   search(binDir);
 
-  if (allFiles.length !== 2) {
+  if (allFiles.length !== 1) {
     throw new Error(
-      `Expected exactly 2 files in ${binDir}, but found ${allFiles.length}: ${JSON.stringify(allFiles.map((p) => path.relative(binDir, p)))}`,
+      `Expected exactly 1 file in ${binDir}, but found ${allFiles.length}: ${JSON.stringify(allFiles.map((p) => path.relative(binDir, p)))}`,
     );
   }
 
-  const requestedPath = allFiles.find((p) => {
-    const name = path.basename(p);
-    return name === binaryName || name === `${binaryName}.exe`;
-  });
-
-  if (!requestedPath) {
-    throw new Error(
-      `Binary '${binaryName}' not found among the 2 files in ${binDir}. Found: ${JSON.stringify(allFiles.map((p) => path.relative(binDir, p)))}`,
-    );
-  }
-
-  return path.resolve(requestedPath);
+  return path.resolve(allFiles[0]);
 }
 
 // Integration for CI/CD or CLI usage: outputs the path to stdout
@@ -63,16 +55,10 @@ const isMain =
     process.argv[1].endsWith("determineBinaryAbsolutePath.js"));
 
 if (isMain) {
-  const arg = process.argv[2] as "ffmpeg" | "ffprobe";
-  if (arg === "ffmpeg" || arg === "ffprobe") {
-    try {
-      console.log(determineBinaryAbsolutePath(arg));
-    } catch (e: any) {
-      console.error(`Error: ${e.message}`);
-      process.exit(1);
-    }
-  } else {
-    console.error("Usage: node determineBinaryAbsolutePath.ts [ffmpeg|ffprobe]");
+  try {
+    console.log(determineBinaryAbsolutePath());
+  } catch (e: any) {
+    console.error(`Error: ${e.message}`);
     process.exit(1);
   }
 }

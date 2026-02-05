@@ -13,7 +13,7 @@ const testBinDir = path.join(__dirname, "test_bin_mock");
  * /bin/bash ts.sh --test electron/src/tools/determineBinaryAbsolutePath.test.ts
  */
 describe("determineBinaryAbsolutePath", () => {
-  // Helper to clear and setup exactly two files
+  // Helper to clear and setup exactly one file
   const setupFiles = (paths: string[]) => {
     if (fs.existsSync(testBinDir)) {
       fs.rmSync(testBinDir, { recursive: true, force: true });
@@ -33,52 +33,38 @@ describe("determineBinaryAbsolutePath", () => {
     }
   });
 
-  it("should find ffmpeg in darwin structure when exactly 2 files exist", () => {
-    setupFiles(["darwin/arm64/ffmpeg", "darwin/arm64/ffprobe"]);
-    const p = determineBinaryAbsolutePath("ffmpeg", testBinDir);
-    assert.ok(p.endsWith("darwin/arm64/ffmpeg"));
+  it("should find the only binary in darwin structure", () => {
+    setupFiles(["darwin/arm64/rclone"]);
+    const p = determineBinaryAbsolutePath(testBinDir);
+    assert.ok(p.endsWith("darwin/arm64/rclone"));
     assert.ok(path.isAbsolute(p));
   });
 
-  it("should find ffprobe in darwin structure when exactly 2 files exist", () => {
-    setupFiles(["darwin/arm64/ffmpeg", "darwin/arm64/ffprobe"]);
-    const p = determineBinaryAbsolutePath("ffprobe", testBinDir);
-    assert.ok(p.endsWith("darwin/arm64/ffprobe"));
+  it("should find the only binary in win32 structure", () => {
+    setupFiles(["win32/x64/rclone.exe"]);
+    const p = determineBinaryAbsolutePath(testBinDir);
+    assert.ok(p.endsWith("win32/x64/rclone.exe"));
     assert.ok(path.isAbsolute(p));
   });
 
-  it("should find ffmpeg.exe in win32 structure when exactly 2 files exist", () => {
-    setupFiles(["win32/x64/ffmpeg.exe", "win32/x64/ffprobe.exe"]);
-    const p = determineBinaryAbsolutePath("ffmpeg", testBinDir);
-    assert.ok(p.endsWith("win32/x64/ffmpeg.exe"));
-    assert.ok(path.isAbsolute(p));
-  });
-
-  it("should throw error if more than 2 files exist", () => {
-    setupFiles(["darwin/arm64/ffmpeg", "darwin/arm64/ffprobe", "extra.txt"]);
+  it("should throw error if more than 1 file exist", () => {
+    setupFiles(["darwin/arm64/rclone", "extra.txt"]);
     assert.throws(() => {
-      determineBinaryAbsolutePath("ffmpeg", testBinDir);
-    }, /Expected exactly 2 files/);
+      determineBinaryAbsolutePath(testBinDir);
+    }, /Expected exactly 1 file/);
   });
 
-  it("should throw error if fewer than 2 files exist", () => {
-    setupFiles(["darwin/arm64/ffmpeg"]);
+  it("should throw error if 0 files exist", () => {
+    setupFiles([]);
     assert.throws(() => {
-      determineBinaryAbsolutePath("ffmpeg", testBinDir);
-    }, /Expected exactly 2 files/);
+      determineBinaryAbsolutePath(testBinDir);
+    }, /Expected exactly 1 file/);
   });
 
   it("should throw error if bin directory is missing", () => {
     const nonExistent = path.join(__dirname, "non_existent_dir_random");
     assert.throws(() => {
-      determineBinaryAbsolutePath("ffmpeg", nonExistent);
+      determineBinaryAbsolutePath(nonExistent);
     }, /Bin directory not found/);
-  });
-
-  it("should throw error if exactly 2 files exist but neither is the requested binary", () => {
-    setupFiles(["other1.txt", "other2.txt"]);
-    assert.throws(() => {
-      determineBinaryAbsolutePath("ffmpeg", testBinDir);
-    }, /Binary 'ffmpeg' not found among the 2 files/);
   });
 });
