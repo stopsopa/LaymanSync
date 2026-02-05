@@ -26,6 +26,10 @@ cat <<EEE
 
 -- DEV NOTES --
 
+/bin/bash electron/download-bins.sh
+  # WARNING: run this at least once
+  # bring binary for our OS and architecture
+
 EEE
 
       `,

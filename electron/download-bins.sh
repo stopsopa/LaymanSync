@@ -7,7 +7,9 @@
 # /bin/bash electron/download-bins.sh win32 x64
 # /bin/bash electron/download-bins.sh win32 arm64
 # /bin/bash electron/download-bins.sh darwin x64
-
+# 
+# /bin/bash electron/download-bins.sh
+#   autodetection OS and architecture
 # 
 
 # fixed version - this is where you can do update
@@ -32,7 +34,32 @@ if ! command -v unzip &> /dev/null; then
 fi
 
 OS_ARG="${1}"
+# Detect OS if not provided
+if [ -z "${OS_ARG}" ]; then
+    DETECTED_OS="$(uname -s)"
+    if [ "${DETECTED_OS}" = "Darwin" ]; then
+        OS_ARG="darwin"
+    elif [[ "${DETECTED_OS}" == MINGW* ]] || [[ "${DETECTED_OS}" == MSYS* ]] || [[ "${DETECTED_OS}" == CYGWIN* ]]; then
+        OS_ARG="win32"
+    fi
+    if [ -n "${OS_ARG}" ]; then
+        echo "🔍 Detected OS: OS_ARG=>${OS_ARG}< (from uname -s => ${DETECTED_OS})"
+    fi
+fi
+
 ARCH_ARG="${2}"
+# Detect ARCH if not provided
+if [ -z "${ARCH_ARG}" ]; then
+    DETECTED_ARCH="$(uname -m)"
+    if [ "${DETECTED_ARCH}" = "x86_64" ]; then
+        ARCH_ARG="x64"
+    elif [ "${DETECTED_ARCH}" = "arm64" ] || [ "${DETECTED_ARCH}" = "aarch64" ]; then
+        ARCH_ARG="arm64"
+    fi
+    if [ -n "${ARCH_ARG}" ]; then
+        echo "🔍 Detected Arch: ARCH_ARG=>${ARCH_ARG}< (from uname -m => ${DETECTED_ARCH})"
+    fi
+fi
 
 # Validation and mapping
 if [ "${OS_ARG}" != "darwin" ] && [ "${OS_ARG}" != "win32" ]; then
