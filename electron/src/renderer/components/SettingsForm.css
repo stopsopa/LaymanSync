@@ -1,0 +1,247 @@
+.settings-form-container {
+  background: var(--aws-white);
+  padding: 0; /* Remove default padding, use it in children */
+  overflow: hidden;
+}
+
+.settings-header {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--aws-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fafafa;
+}
+
+.settings-header .section-title {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.title-area {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.original-dims-badge {
+  background-color: var(--aws-bg-light);
+  color: var(--aws-text-light);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--aws-border);
+  transition: all 0.2s;
+}
+
+.original-dims-badge.is-upscaling {
+  background-color: #e35b5b;
+  color: white;
+  border-color: #e35b5b;
+}
+
+
+.settings-footer {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--aws-border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.apply-all-btn {
+  font-weight: 700;
+  min-width: 120px;
+}
+
+.settings-header .checkbox-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.settings-content {
+  padding: var(--spacing-md);
+}
+
+.settings-placeholder {
+  color: var(--aws-text-light);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--aws-text-dark);
+}
+
+.checkbox-label input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.aws-select, .aws-input {
+  padding: 8px 12px;
+  border: 1px solid var(--aws-border);
+  border-radius: 2px;
+  font-size: 0.9rem;
+  background: var(--aws-white);
+  color: var(--aws-text-dark);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.aws-input:disabled {
+  background-color: var(--aws-bg-light);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.aws-select:focus, .aws-input:not(:disabled):focus {
+  border-color: var(--aws-blue);
+  box-shadow: 0 0 0 1px var(--aws-blue);
+}
+
+.aws-input.invalid {
+  border-color: var(--aws-red);
+  box-shadow: 0 0 0 1px var(--aws-red);
+}
+
+.scaling-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.resolution-short-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm); /* Added margin since it's now under input */
+}
+
+.resolution-short-list label {
+  font-size: 0.75rem; /* Slightly smaller since it's nested */
+  font-weight: 700;
+  color: var(--aws-text-light);
+  text-transform: uppercase;
+}
+
+.resolution-buttons {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.resolution-btn {
+  padding: 4px 8px; /* Slightly tighter padding */
+  border: 1px solid var(--aws-border);
+  background: var(--aws-white);
+  cursor: pointer;
+  border-radius: 2px;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.resolution-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--aws-bg-light);
+}
+
+.resolution-btn:hover {
+  background: var(--aws-bg-light);
+  border-color: var(--aws-text-light);
+}
+
+.resolution-btn.active {
+  background: var(--aws-blue);
+  color: var(--aws-white);
+  border-color: var(--aws-blue);
+}
+
+.manual-resolution-v2 {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.resolution-choice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  flex: 1;
+  padding: var(--spacing-md);
+  border: 1px solid var(--aws-border);
+  border-radius: 2px;
+  background-color: #ffffff;
+  transition: all 0.2s;
+}
+
+.resolution-choice:first-child {
+  max-width: 250px;
+}
+
+.resolution-choice.active {
+  background-color: #f7f9f9;
+  border-left: 4px solid var(--aws-blue);
+  padding-left: calc(var(--spacing-md) - 3px);
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.radio-label .label-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--aws-text-light);
+  text-transform: uppercase;
+}
+
+.radio-label input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.validation-error-text {
+  color: var(--aws-red);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.upscale-warning-box {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: #fff1f0;
+  border-left: 4px solid #e35b5b;
+  border-radius: 2px;
+}
+
+.upscale-warning-title {
+  color: #d13212;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.upscale-warning-text {
+  color: #545b64;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}

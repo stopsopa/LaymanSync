@@ -1,0 +1,191 @@
+:root {
+  --aws-orange: #ff9900;
+  --aws-orange-hover: #ec7211;
+  --aws-blue: #0073bb;
+  --aws-blue-hover: #005f99;
+  --aws-bg-light: #f2f3f3;
+  --aws-border: #d5dbdb;
+  --aws-text-dark: #16191f;
+  --aws-text-light: #545b64;
+  --aws-white: #ffffff;
+  --aws-green: #1d8102;
+  --aws-red: #d13212;
+  --aws-font: "Amazon Ember", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--aws-font);
+  background-color: var(--aws-bg-light);
+  color: var(--aws-text-dark);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: var(--spacing-sm);
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+/* Common Box Style */
+.card {
+  background: var(--aws-white);
+  border: 1px solid var(--aws-border);
+  padding: var(--spacing-md);
+  border-radius: 2px;
+  box-shadow: 0 1px 1px 0 rgba(0, 28, 36, 0.1);
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  color: var(--aws-text-dark);
+}
+
+/* Scrollbar Style */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #aab7b8;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #879596;
+}
+
+/* Button styles */
+.aws-button {
+  padding: 8px 16px;
+  border-radius: 2px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.1s;
+}
+
+.aws-button-primary {
+  background-color: var(--aws-orange);
+  color: var(--aws-white);
+}
+
+.aws-button-primary:hover {
+  background-color: var(--aws-orange-hover);
+}
+
+.aws-button-success {
+  background-color: var(--aws-green);
+  color: var(--aws-white);
+}
+
+.aws-button-secondary {
+  background-color: var(--aws-white);
+  border-color: var(--aws-text-light);
+  color: var(--aws-text-dark);
+}
+
+.aws-button-secondary:hover {
+  background-color: var(--aws-bg-light);
+}
+
+.aws-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+/* Common Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 28, 36, 0.5); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(1px);
+}
+
+.modal-content {
+  background: var(--aws-white);
+  border: 1px solid var(--aws-border);
+  border-radius: 2px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--aws-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fafafa;
+}
+
+.modal-header h2, .modal-header .modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--aws-text-dark);
+}
+
+.modal-header .close-btn, .modal-header .close-x-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--aws-text-light);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.modal-header .close-btn:hover, .modal-header .close-x-btn:hover {
+  color: var(--aws-text-dark);
+}
+
+.modal-body {
+  padding: var(--spacing-md);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--aws-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  background-color: #fafafa;
+}

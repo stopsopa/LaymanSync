@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.electron.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist-electron"
+  },
+  "include": ["src/main/**/*", "src/tools/**/*"],
+  "exclude": ["src/tools/**/*.test.ts", "src/tools/**/*.run.ts", "src/tools/cli.ts"]
+}

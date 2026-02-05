@@ -1,0 +1,217 @@
+name: Release Build
+
+on:
+  # Trigger 1: Global Event Listener
+  # This waits for a GitHub global event. Specifically, when someone (or a bot using a Personal Access Token)
+  # creates a new Release in the "Releases" tab.
+  # Note: Releases created by the default GITHUB_TOKEN will NOT trigger this (to prevent recursion).
+  release:
+    types: [published]
+  # This trigger allows this workflow to be called by other workflows (like bump-version.yml)
+  workflow_call:
+    inputs:
+      tag_name:
+        description: "The tag to release (e.g. v1.0.0). Defaults to github.ref_name."
+        required: false
+        type: string
+      run_electron_build:
+        description: "Run official Electron build steps (QA & Release)?"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build-code:
+    name: "📦 Step 1: Build Application Code (Release)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: electron/package-lock.json
+
+      - name: "📦 Install, Sync & Build"
+        working-directory: ./electron
+        shell: bash
+        run: |
+          npm ci
+          # Version Sync
+          REF_NAME=${{ inputs.tag_name || github.ref_name }}
+          VERSION=${REF_NAME#v}
+          echo "Setting package.json version to $VERSION"
+          npm version $VERSION --no-git-tag-version --allow-same-version
+
+          npm run build
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### 📦 Step 1: Build Application Code
+          - **Version**: $VERSION
+          - **Status**: Completed
+          EOF
+
+      - name: 📤 Upload Built Code
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-code-release
+          path: |
+            electron/dist/
+            electron/dist-electron/
+            electron/package.json
+            electron/setup.json
+          retention-days: 1
+
+  package:
+    name: 🏗️ Package (${{ matrix.target }} ${{ matrix.arch }})
+    needs: build-code
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            arch: x64
+            target: mac
+            bins_os: darwin
+          - os: macos-latest
+            arch: arm64
+            target: mac
+            bins_os: darwin
+          - os: ubuntu-latest
+            arch: x64
+            target: win
+            bins_os: win32
+          - os: ubuntu-latest
+            arch: arm64
+            target: win
+            bins_os: win32
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "🔍 Audit"
+        shell: bash
+        run: |
+          echo "### Release Context ###"
+          echo "Event ${{ github.event_name }}: >${{ github.event_name }}<"
+          echo "Tag ${{ inputs.tag_name }}:   >${{ inputs.tag_name }}<"
+          echo "Ref ${{ github.ref_name }}:   >${{ github.ref_name }}<"
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### 🔍 Audit (Release - ${{ matrix.target }} ${{ matrix.arch }})
+          - **Event**: ${{ github.event_name }}
+          - **Tag**: ${{ inputs.tag_name || github.ref_name }}
+          EOF
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: electron/package-lock.json
+
+      - name: 🍷 Install Wine (for Windows build on Linux)
+        if: matrix.target == 'win' && runner.os == 'Linux'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends wine64 wine32 wine
+          wine --version
+
+      - name: "🧹 Step 0: Clearing release directory"
+        working-directory: ./electron
+        run: |
+          mkdir -p release
+          rm -rf release/* 2>/dev/null || true
+          rm -rf release/.* 2>/dev/null || true
+
+      - name: 📥 Download Built Code
+        uses: actions/download-artifact@v4
+        with:
+          name: built-code-release
+          path: electron
+
+      - name: "📦 Step A: Prepare & Download Binaries"
+        working-directory: ./electron
+        shell: bash
+        run: |
+          npm ci
+          /bin/bash download-bins.sh ${{ matrix.bins_os }} ${{ matrix.arch }}
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### 📦 Step A: Prepare & Download Binaries (${{ matrix.target }} ${{ matrix.arch }})
+          Dependencies installed and binaries downloaded.
+          EOF
+
+      - name: 🔍 Binary Audit
+        working-directory: ./electron
+        run: |
+          echo "Listing bin directory content:"
+          if [ -d "bin" ]; then
+            find bin -maxdepth 4 -ls
+          else
+            echo "⚠️ ERROR: bin directory NOT FOUND in $(pwd)"
+          fi
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### 🔍 Binary Audit
+          $(if [ -d "bin" ]; then find bin -maxdepth 4 -not -path '*/.*'; else echo "bin directory not found"; fi)
+          EOF
+
+      - name: "🏗️ Step B: Packaging Electron App (Publish)"
+        if: github.event_name == 'release' || inputs.run_electron_build
+        working-directory: ./electron
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: electron-builder
+        shell: bash
+        run: |
+          ls -R dist 2>/dev/null || echo "dist not found"
+          ls -R dist-electron 2>/dev/null || echo "dist-electron not found"
+          if [ "${{ matrix.target }}" = "win" ]; then
+            npx electron-builder --win "--${{ matrix.arch }}" --publish always
+          else
+            npx electron-builder --mac "--${{ matrix.arch }}" --publish always
+          fi
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### 🏗️ Step B: Packaging Electron App (Publish) (${{ matrix.target }} ${{ matrix.arch }})
+          Version published for ${{ matrix.target }} (${{ matrix.arch }}).
+          EOF
+
+      - name: 📤 Upload Build Metadata
+        working-directory: ./electron
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME=${{ inputs.tag_name || github.ref_name }}
+          gh release upload $TAG_NAME package.json --clobber
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### 📤 Upload Build Metadata (${{ matrix.target }} ${{ matrix.arch }})
+          Metadata (\`package.json\`) uploaded to release.
+          EOF
+
+  summary:
+    name: 📢 Release Summary
+    needs: package
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: 📢 Summary
+        run: |
+          TAG_NAME=${{ inputs.tag_name || github.ref_name }}
+          REPO_URL="https://github.com/${{ github.repository }}"
+          RELEASE_URL="$REPO_URL/releases/tag/$TAG_NAME"
+
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### 🚀 Release Build Pipeline Complete!
+          All macOS and Windows builds (x64 and arm64) have finished.
+
+          You can view the release and download the artifacts here:
+          👉 [**$TAG_NAME**]($RELEASE_URL)
+          EOF
