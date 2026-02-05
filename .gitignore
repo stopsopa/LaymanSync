@@ -22,3 +22,4 @@ ffmpeg*.log
 example/*.png
 example/*.gif
 /electron/tmp_download/
+/electron/coverage/
