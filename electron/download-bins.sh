@@ -1,3 +1,18 @@
+# 
+# /bin/bash electron/download-bins.sh ${{ matrix.bins_os }} ${{ matrix.arch }}
+#   where bin_os can be [OS_ARG]: darwin, win32
+#   where arch can be [ARCH_ARG]: x64, arm64
+#
+# /bin/bash electron/download-bins.sh darwin arm64
+# /bin/bash electron/download-bins.sh win32 x64
+# /bin/bash electron/download-bins.sh win32 arm64
+# /bin/bash electron/download-bins.sh darwin x64
+
+# 
+
+# fixed version - this is where you can do update
+VERSION="1.73.0"
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 set -e
@@ -11,37 +26,13 @@ if ! command -v curl &> /dev/null; then
     exit 1
 fi
 
+if ! command -v unzip &> /dev/null; then
+    echo "${0} error: unzip is not installed. Please install unzip to extract binaries."
+    exit 1
+fi
+
 OS_ARG="${1}"
 ARCH_ARG="${2}"
-
-# If arguments are missing, try to detect the current system
-if [ -z "${OS_ARG}" ]; then
-    DETECTED_OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-    if [ "${DETECTED_OS}" = "darwin" ]; then
-        OS_ARG="darwin"
-    elif [[ "${DETECTED_OS}" == "mingw"* ]] || [[ "${DETECTED_OS}" == "msys"* ]] || [[ "${DETECTED_OS}" == "cygwin"* ]]; then
-        OS_ARG="win32"
-    else
-        # Default to win32 only if we are on a system that looks like windows
-        if [ "$OS" = "Windows_NT" ]; then
-            OS_ARG="win32"
-        else
-            echo "${0} error: OS argument (1) is missing and could not be detected. Usage: /bin/bash ${DIR}/download-bins.sh [darwin|win32] [x64|arm64]"
-            exit 1
-        fi
-    fi
-    echo "🔍 Detected OS: ${OS_ARG}"
-fi
-
-if [ -z "${ARCH_ARG}" ]; then
-    DETECTED_ARCH=$(uname -m)
-    if [ "${DETECTED_ARCH}" = "arm64" ] || [ "${DETECTED_ARCH}" = "aarch64" ]; then
-        ARCH_ARG="arm64"
-    else
-        ARCH_ARG="x64"
-    fi
-    echo "🔍 Detected ARCH: ${ARCH_ARG}"
-fi
 
 # Validation and mapping
 if [ "${OS_ARG}" != "darwin" ] && [ "${OS_ARG}" != "win32" ]; then
@@ -54,31 +45,9 @@ if [ "${ARCH_ARG}" != "x64" ] && [ "${ARCH_ARG}" != "arm64" ]; then
     exit 1
 fi
 
-# Target architecture for the directory structure
-TARGET_OS="${OS_ARG}"
-TARGET_ARCH="${ARCH_ARG}"
-
-# Architecture to actually download (might be different due to fallbacks)
-DOWNLOAD_OS="${OS_ARG}"
-DOWNLOAD_ARCH="${ARCH_ARG}"
-
-# Specific check for Windows arm64 which is often not available for ffmpeg-static
-# If Windows arm64 is requested, we fallback to x64 as Windows can run x64 binaries via emulation
-if [ "${OS_ARG}" = "win32" ] && [ "${ARCH_ARG}" = "arm64" ]; then
-    cat <<EEE
-
-    ⚠️  NOTE: FFmpeg binaries for Windows arm64 are not available from the source.
-       Falling back to win32/x64 binaries (Windows on ARM can run these via emulation).
-       OS_ARG=>${OS_ARG}< ARCH_ARG=>${ARCH_ARG}< -> Using x64 for download, keeping arm64 directory.
-
-EEE
-
-    DOWNLOAD_ARCH="x64"
-fi
-
 # Clear the entire bin directory to ensure only the requested binaries for this OS/ARCH are present
 BIN_DIR="${DIR}/bin"
-TARGET_DIR="${BIN_DIR}/${TARGET_OS}/${TARGET_ARCH}"
+TARGET_DIR="${BIN_DIR}/${OS_ARG}/${ARCH_ARG}"
 
 echo "🧹 Clearing existing binaries in ${BIN_DIR}..."
 rm -rf "${BIN_DIR}"
@@ -86,55 +55,88 @@ rm -rf "${BIN_DIR}"
 # Create directory structure
 mkdir -p "${TARGET_DIR}"
 
-# Version of binaries to download
-# Based on eugeneware/ffmpeg-static b6.1.1 release which contains both ffmpeg and ffprobe
-VERSION="b6.1.1"
-BASE_URL="https://github.com/eugeneware/ffmpeg-static/releases/download/${VERSION}"
+# Map OS_ARG and ARCH_ARG to rclone's naming convention using clear if-else blocks
+OS_MAP="${OS_ARG}"
+if [ "${OS_ARG}" = "darwin" ]; then
+    OS_MAP="osx"
+elif [ "${OS_ARG}" = "win32" ]; then
+    OS_MAP="windows"
+fi
 
-echo "--------------------------------------------------------"
-echo "📥 Downloading FFmpeg and FFprobe binaries for ${TARGET_OS} ${TARGET_ARCH}..."
-echo "--------------------------------------------------------"
+ARCH_MAP="${ARCH_ARG}"
+if [ "${ARCH_ARG}" = "x64" ]; then
+    ARCH_MAP="amd64"
+fi
 
-# Download function
-download_bin() {
-    local name="${1}"
-    
-    # On Windows, we append .exe to the local filename
-    local local_file_name="${name}"
-    if [ "${TARGET_OS}" = "win32" ]; then
-        local_file_name="${name}.exe"
-    fi
-    
-    local target="${DIR}/bin/${TARGET_OS}/${TARGET_ARCH}/${local_file_name}"
-    local url="${BASE_URL}/${name}-${DOWNLOAD_OS}-${DOWNLOAD_ARCH}"
-    
-    if [ -f "${target}" ]; then
-        echo "   [ok] ${local_file_name} (${TARGET_OS}/${TARGET_ARCH}) already exists."
-    else
-        echo "   [+] ${local_file_name} (${TARGET_OS}/${TARGET_ARCH}) -> ${target}"
-        if ! curl -L -f -o "${target}" "${url}"; then
-            echo "${0} error: Failed to download name=>${name}< for TARGET_OS=>${TARGET_OS}< / TARGET_ARCH=>${TARGET_ARCH}< from source url=>${url}<"
-            exit 1
-        fi
-        chmod +x "${target}"
-    fi
-}
+ASSET_NAME="rclone-v${VERSION}-${OS_MAP}-${ARCH_MAP}"
+ZIP_NAME="${ASSET_NAME}.zip"
+URL="https://github.com/rclone/rclone/releases/download/v${VERSION}/${ZIP_NAME}"
 
-# Download both ffmpeg and ffprobe
-download_bin "ffmpeg"
-download_bin "ffprobe"
 
-echo "--------------------------------------------------------"
-echo "✅ Binaries ready in ${BIN_DIR}"
-echo "--------------------------------------------------------"
-ls -R -lah "${BIN_DIR}"
+cat <<EOF
+--------------------------------------------------------
+📥 Downloading Rclone binary for ${OS_ARG} ${ARCH_ARG}...
+URL: ${URL}
+--------------------------------------------------------
+EOF
 
-# Audit: Check if there are EXACTLY 2 files in the bin directory
+TEMP_DIR="${DIR}/tmp_download"
+rm -rf "${TEMP_DIR}"
+mkdir -p "${TEMP_DIR}"
+trap 'rm -rf "${TEMP_DIR}"' EXIT
+
+ZIP_PATH="${TEMP_DIR}/${ZIP_NAME}"
+
+
+if ! curl -L -f -o "${ZIP_PATH}" "${URL}"; then
+    echo "${0} error: Failed to download rclone from source URL=>${URL}<"
+    exit 1
+fi
+
+if [ ! -f "${ZIP_PATH}" ]; then
+    echo "${0} error: Zip file not found after download at expected location: ZIP_PATH=>${ZIP_PATH}<"
+    exit 1
+fi
+
+echo "📦 Extracting rclone..."
+unzip -q "${ZIP_PATH}" -d "${TEMP_DIR}"
+
+BINARY_NAME="rclone"
+if [ "${OS_ARG}" = "win32" ]; then
+    BINARY_NAME="rclone.exe"
+fi
+
+SOURCE_BINARY="${TEMP_DIR}/${ASSET_NAME}/${BINARY_NAME}"
+TARGET_BINARY="${TARGET_DIR}/${BINARY_NAME}"
+
+if [ ! -f "${SOURCE_BINARY}" ]; then
+    cat <<EOF
+${0} error: Binary not found at expected location: SOURCE_BINARY=>${SOURCE_BINARY}<
+Contents of extracted dir:
+EOF
+    ls -R "${TEMP_DIR}"
+
+    exit 1
+fi
+
+cp "${SOURCE_BINARY}" "${TARGET_BINARY}"
+chmod +x "${TARGET_BINARY}"
+
+cat <<EOF
+--------------------------------------------------------
+✅ Binary ready in ${TARGET_DIR}
+--------------------------------------------------------
+EOF
+ls -lah "${TARGET_BINARY}"
+
+# Audit: Check if there is EXACTLY 1 file in the bin directory tree
 FILE_COUNT=$(find "${BIN_DIR}" -type f | wc -l | xargs)
-if [ "${FILE_COUNT}" != "2" ]; then
-    echo "${0} error: Audit failed. Expected 2 files in ${BIN_DIR}, but found ${FILE_COUNT}."
-    echo "Directory structure:"
+if [ "${FILE_COUNT}" != "1" ]; then
+    cat <<EOF
+${0} error: Audit failed. Expected 1 file in BIN_DIR=>${BIN_DIR}<, but found FILE_COUNT=>${FILE_COUNT}<
+Directory structure:
+EOF
     find "${BIN_DIR}" -maxdepth 4 -ls
     exit 1
 fi
-echo "Audit passed: found exactly ${FILE_COUNT} files in ${BIN_DIR}."
+echo "Audit passed: found exactly ${FILE_COUNT} file in ${BIN_DIR}."

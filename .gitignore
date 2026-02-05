@@ -21,3 +21,4 @@ ffmpeg*.log
 *.mov
 example/*.png
 example/*.gif
+/electron/tmp_download/
