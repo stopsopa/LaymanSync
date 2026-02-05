@@ -16,7 +16,7 @@ const th = (msg: string) => new Error(`extractMetadata.ts error: ${msg}`);
  */
 export async function extractMetadata(ffprobePath: string | undefined, filePath: string) {
   if (!ffprobePath) {
-    ffprobePath = determineBinaryAbsolutePath("ffprobe");
+    ffprobePath = determineBinaryAbsolutePath();
   }
   if (!existsSync(filePath)) {
     throw th(`File not found: ${filePath}`);
@@ -116,7 +116,7 @@ if (import.meta?.main) {
         process.exit(1);
       }
 
-      const ffprobePath = determineBinaryAbsolutePath("ffprobe");
+      const ffprobePath = determineBinaryAbsolutePath();
 
       const meta = await extractMetadata(ffprobePath, file);
       process.stdout.write(`${meta.width}\n`);

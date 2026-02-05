@@ -79,12 +79,12 @@ export default async function driveCompression(options: DriveCompressionOptions)
 
   let resolveFfmpegPath = ffmpegPath;
   if (!resolveFfmpegPath) {
-    resolveFfmpegPath = determineBinaryAbsolutePath("ffmpeg");
+    resolveFfmpegPath = determineBinaryAbsolutePath();
   }
 
   let resolveFfprobePath = ffprobePath;
   if (!resolveFfprobePath) {
-    resolveFfprobePath = determineBinaryAbsolutePath("ffprobe");
+    resolveFfprobePath = determineBinaryAbsolutePath();
   }
 
   let { videoHeight, videoWidth } = options;
