@@ -12,6 +12,7 @@
 import process from "node:process";
 import { generateRcloneParamsStrings, type Params } from "./generateRcloneParams.js";
 import { determineBinaryAbsolutePath } from "./determineBinaryAbsolutePath.js";
+import { escapeFilePath } from "./escapeFilePath.js";
 
 const args = process.argv.slice(2);
 
@@ -101,7 +102,7 @@ try {
   const rcloneArgs = generateRcloneParamsStrings(params);
 
   if (params.mainExec) {
-    process.stdout.write(`${params.mainExec} ${rcloneArgs}\n`);
+    process.stdout.write(`${escapeFilePath(params.mainExec)} ${rcloneArgs}\n`);
   } else {
     process.stdout.write(`${rcloneArgs}\n`);
   }

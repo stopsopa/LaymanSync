@@ -95,6 +95,11 @@ export default function generateRcloneParams<P extends Params>(params: P): Rclon
     flags.push("--bwlimit", process.env.BWLIMIT);
   }
 
+  if (process.env.DRY_RUN) {
+    const flags = result[1] as string[];
+    flags.push("--dry-run");
+  }
+
   return result;
 }
 

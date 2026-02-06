@@ -23,3 +23,4 @@ example/*.png
 example/*.gif
 /electron/tmp_download/
 /electron/coverage/
+/electron/node_modules2/
