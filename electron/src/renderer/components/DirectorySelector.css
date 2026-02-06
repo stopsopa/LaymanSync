@@ -1,0 +1,68 @@
+.directory-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.directory-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #232f3e;
+  text-transform: capitalize;
+}
+
+.dropzone {
+  border: 2px dashed #d5dbdb;
+  border-radius: 8px;
+  padding: 20px 24px;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropzone:hover:not(.disabled) {
+  border-color: #ff9900;
+  background-color: #fff8f0;
+}
+
+.dropzone.dragging {
+  border-color: #ff9900;
+  background-color: #fff8f0;
+  border-style: solid;
+}
+
+.dropzone.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+}
+
+.dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.folder-icon {
+  color: #879596;
+  transition: color 0.2s ease;
+}
+
+.dropzone:hover:not(.disabled) .folder-icon,
+.dropzone.dragging .folder-icon {
+  color: #ff9900;
+}
+
+.dropzone-text {
+  margin: 0;
+  font-size: 14px;
+  color: #545b64;
+  text-align: center;
+}

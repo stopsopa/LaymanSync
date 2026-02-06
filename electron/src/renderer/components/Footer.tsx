@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import './Footer.css';
 
 const Footer: React.FC = () => {
-  const [versions, setVersions] = useState<{ ffmpeg: string; ffprobe: string } | null>(null);
+  const [rcloneVersion, setRcloneVersion] = useState<string | null>(null);
 
   useEffect(() => {
-    window.electronAPI.getAppVersions().then(setVersions);
+    window.electronAPI.getRcloneVersion().then(setRcloneVersion);
   }, []);
 
   const handleOpenLink = (e: React.MouseEvent, url: string) => {
@@ -16,30 +16,20 @@ const Footer: React.FC = () => {
   return (
     <footer className="app-footer">
       <div className="footer-left">
-        {versions && (
-          <>
-            <a 
-              href="https://ffmpeg.org" 
-              onClick={(e) => handleOpenLink(e, 'https://ffmpeg.org')}
-              className="version-link"
-            >
-              ffmpeg: {versions.ffmpeg}
-            </a>
-            <span className="separator">|</span>
-            <a 
-              href="https://ffmpeg.org" 
-              onClick={(e) => handleOpenLink(e, 'https://ffmpeg.org')}
-              className="version-link"
-            >
-              ffprobe: {versions.ffprobe}
-            </a>
-          </>
+        {rcloneVersion && (
+          <a 
+            href="https://github.com/rclone/rclone" 
+            onClick={(e) => handleOpenLink(e, 'https://github.com/rclone/rclone')}
+            className="version-link"
+          >
+            rclone: {rcloneVersion}
+          </a>
         )}
       </div>
       <div className="footer-right">
         <a 
-          href="https://github.com/stopsopa/WebMCompressor" 
-          onClick={(e) => handleOpenLink(e, 'https://github.com/stopsopa/WebMCompressor')}
+          href="https://github.com/stopsopa/LaymanSync" 
+          onClick={(e) => handleOpenLink(e, 'https://github.com/stopsopa/LaymanSync')}
           className="github-link"
         >
           Homepage:

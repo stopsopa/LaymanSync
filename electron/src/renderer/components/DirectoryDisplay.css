@@ -1,0 +1,54 @@
+.directory-display {
+  background-color: #f9f9f9;
+  border: 1px solid #d5dbdb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.directory-row {
+  display: grid;
+  grid-template-columns: 180px 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.directory-row-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #232f3e;
+  white-space: nowrap;
+}
+
+.directory-row-path {
+  font-size: 13px;
+  color: #545b64;
+  font-family: "Monaco", "Menlo", "Courier New", monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.show-finder-button {
+  padding: 6px 16px;
+  background-color: white;
+  border: 1px solid #d5dbdb;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #232f3e;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.show-finder-button:hover {
+  background-color: #fafafa;
+  border-color: #879596;
+}
+
+.show-finder-button:active {
+  background-color: #eaeded;
+}

@@ -1,26 +1,9 @@
+// This component is not used in LaymanSync Phase 1
+// Stub to prevent compilation errors
 import React from 'react';
-import SettingsForm from './SettingsForm';
-import type { FormSettings } from '../types';
 
-interface GlobalSettingsProps {
-  form: FormSettings;
-  onChange: (form: FormSettings) => void;
-  onValidationChange: (isValid: boolean) => void;
-  onApplyToAll?: () => void;
-}
-
-const GlobalSettings: React.FC<GlobalSettingsProps> = ({ form, onChange, onValidationChange, onApplyToAll }) => {
-  return (
-    <div className="global-settings-wrapper">
-      <SettingsForm 
-        title="Global Settings"
-        config={form}
-        onChange={onChange}
-        onValidationChange={onValidationChange}
-        onApplyToAll={onApplyToAll}
-      />
-    </div>
-  );
+const GlobalSettings: React.FC = () => {
+  return null;
 };
 
 export default GlobalSettings;

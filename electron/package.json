@@ -1,12 +1,12 @@
 {
-  "name": "webmcompressor",
+  "name": "laymansync",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stopsopa/webmcompressor.git"
+    "url": "git+https://github.com/stopsopa/LaymanSync.git"
   },
   "version": "1.0.0",
-  "description": "High-efficiency WebM video compressor using two-pass encoding.",
+  "description": "GUI for rclone - simple directory sync and copy tool.",
   "author": "stopsopa",
   "type": "module",
   "main": "dist-electron/main/main.js",
@@ -18,8 +18,8 @@
     "build": "tsc -b && vite build && tsc -p tsconfig.main.json && tsc -p tsconfig.preload.json"
   },
   "build": {
-    "appId": "com.stopsopa.webmcompressor",
-    "productName": "WebMCompressor",
+    "appId": "com.stopsopa.laymansync",
+    "productName": "LaymanSync",
     "directories": {
       "output": "release"
     },
