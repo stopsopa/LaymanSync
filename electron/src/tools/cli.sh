@@ -9,7 +9,7 @@ export NODE_OPTIONS=""
 
 # export BWLIMIT="1k"
 export BWLIMIT="10"
-export DRY_RUN="true"
+# export DRY_RUN="true"
 
 set -e
 
