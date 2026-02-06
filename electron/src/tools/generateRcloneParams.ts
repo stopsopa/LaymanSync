@@ -43,6 +43,34 @@ export type RcloneParams<P extends Params = Params> = [
   string, // resolved destinationDir
 ];
 
+const processPath = (name: string, p: string, isSource: boolean): string => {
+  // If it contains a colon, assume it's a remote path and return as is
+  if (p.includes(":")) {
+    return p;
+  }
+
+  // Resolve relative local path to absolute
+  const resolvedPath = path.resolve(p);
+
+  // Real directory validation
+  try {
+    const stats = fs.statSync(resolvedPath);
+    if (!stats.isDirectory()) {
+      throw new Error(`generateRcloneParams.ts error: ${name} path exists but is not a directory: ${resolvedPath}`);
+    }
+  } catch (err: any) {
+    if (err.code === "ENOENT") {
+      if (isSource) {
+        throw new Error(`generateRcloneParams.ts error: ${name} directory does not exist: ${resolvedPath}`);
+      }
+      return resolvedPath;
+    }
+    throw err;
+  }
+
+  return resolvedPath;
+};
+
 /**
  * Generates rclone parameters based on input Params.
  * By using a generic <P extends Params>, TypeScript can track the literal
@@ -51,32 +79,8 @@ export type RcloneParams<P extends Params = Params> = [
 export default function generateRcloneParams<P extends Params>(params: P): RcloneParams<P> {
   const { delete: isDelete, sourceDir, destinationDir } = params;
 
-  const processPath = (name: string, p: string): string => {
-    // If it contains a colon, assume it's a remote path and return as is
-    if (p.includes(":")) {
-      return p;
-    }
-
-    // Resolve relative local path to absolute
-    const resolvedPath = path.resolve(p);
-
-    // Real directory validation
-    try {
-      if (!fs.statSync(resolvedPath).isDirectory()) {
-        throw new Error(`generateRcloneParams.ts error: ${name} path exists but is not a directory: ${resolvedPath}`);
-      }
-    } catch (err: any) {
-      if (err.code === "ENOENT") {
-        throw new Error(`generateRcloneParams.ts error: ${name} directory does not exist: ${resolvedPath}`);
-      }
-      throw err;
-    }
-
-    return resolvedPath;
-  };
-
-  const finalSource = processPath("Source", sourceDir);
-  const finalDestination = processPath("Destination", destinationDir);
+  const finalSource = processPath("Source", sourceDir, true);
+  const finalDestination = processPath("Destination", destinationDir, false);
 
   const result: RcloneParams<P> = [
     (isDelete ? "sync" : "copy") as ResolveAction<P["delete"]>,
