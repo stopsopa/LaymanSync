@@ -7,14 +7,14 @@ const __dirname = path.dirname(__filename);
 
 /**
  * Finds the absolute path to the single binary within the 'bin' directory.
- * Expects exactly 1 file in total within the 'bin' directory structure.
+ * download-bins.sh ensures there is exactly one file in the bin directory tree.
  * 
- * /bin/ts.sh electron/src/tools/determineBinaryAbsolutePath.ts
+ * /bin/bash ts.sh electron/src/tools/determineBinaryAbsolutePath.ts
  */
 export function determineBinaryAbsolutePath(searchDir?: string): string {
-  // If searchDir is not provided, we look for 'bin' two levels up from this tool
-  // which matches electron/bin/ when the tool is in electron/src/tools/
-  const binDir = searchDir || path.join(__dirname, "..", "..", "bin");
+  // If searchDir is not provided, we look for 'bin' three levels up from this tool
+  // which matches PROJECT_ROOT/electron/bin when the tool is in PROJECT_ROOT/electron/src/tools/
+  const binDir = searchDir || path.resolve(__dirname, "..", "..", "bin");
 
   if (!fs.existsSync(binDir)) {
     throw new Error(`Bin directory not found: ${binDir}`);
@@ -25,7 +25,6 @@ export function determineBinaryAbsolutePath(searchDir?: string): string {
   // Recursive search to collect all files
   const search = (dir: string) => {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
-
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
@@ -38,9 +37,23 @@ export function determineBinaryAbsolutePath(searchDir?: string): string {
 
   search(binDir);
 
-  if (allFiles.length !== 1) {
+  if (allFiles.length === 0) {
+    throw new Error(`No files found in ${binDir}. Have you run download-bins.sh?`);
+  }
+
+  if (allFiles.length > 1) {
+    // If there are multiple files, we might be in a state before Audit passed or something.
+    // Let's just return the first one that doesn't look like a hidden file,
+    // but better to warn.
+    const filtered = allFiles.filter((f) => !path.basename(f).startsWith("."));
+    if (filtered.length === 1) {
+      return path.resolve(filtered[0]);
+    }
+
     throw new Error(
-      `Expected exactly 1 file in ${binDir}, but found ${allFiles.length}: ${JSON.stringify(allFiles.map((p) => path.relative(binDir, p)))}`,
+      `Expected exactly 1 file in ${binDir}, but found ${allFiles.length}: ${JSON.stringify(
+        allFiles.map((p) => path.relative(binDir, p)),
+      )}`,
     );
   }
 
@@ -56,7 +69,8 @@ const isMain =
 
 if (isMain) {
   try {
-    console.log(determineBinaryAbsolutePath());
+    const searchDir = process.argv[2];
+    console.log(determineBinaryAbsolutePath(searchDir));
   } catch (e: any) {
     console.error(`Error: ${e.message}`);
     process.exit(1);
