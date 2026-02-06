@@ -14,6 +14,31 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Open URL in system browser
   openExternal: (url: string) => ipcRenderer.send("app:openExternal", url),
+
+  // Start sync/copy operation
+  startSync: (options: { sourceDir: string; destinationDir: string; deleteMode: boolean }) =>
+    ipcRenderer.send("sync:start", options),
+
+  // Listen for sync progress events
+  onSyncProgress: (callback: (data: any) => void) => {
+    const listener = (_event: any, data: any) => callback(data);
+    ipcRenderer.on("sync:progress", listener);
+    return () => ipcRenderer.removeListener("sync:progress", listener);
+  },
+
+  // Listen for sync log events
+  onSyncLog: (callback: (line: string) => void) => {
+    const listener = (_event: any, line: string) => callback(line);
+    ipcRenderer.on("sync:log", listener);
+    return () => ipcRenderer.removeListener("sync:log", listener);
+  },
+
+  // Listen for sync end events
+  onSyncEnd: (callback: (result: { error: string | null; duration: string }) => void) => {
+    const listener = (_event: any, result: any) => callback(result);
+    ipcRenderer.on("sync:end", listener);
+    return () => ipcRenderer.removeListener("sync:end", listener);
+  },
 });
 
 // Type definition for window.electronAPI
@@ -24,6 +49,10 @@ declare global {
       revealDirectory: (dirPath: string) => void;
       getRcloneVersion: () => Promise<string>;
       openExternal: (url: string) => void;
+      startSync: (options: { sourceDir: string; destinationDir: string; deleteMode: boolean }) => void;
+      onSyncProgress: (callback: (data: any) => void) => () => void;
+      onSyncLog: (callback: (line: string) => void) => () => void;
+      onSyncEnd: (callback: (result: { error: string | null; duration: string }) => void) => () => void;
     };
   }
 }

@@ -101,3 +101,39 @@ ipcMain.handle("app:getRcloneVersion", async () => {
 ipcMain.on("app:openExternal", (_event, url: string) => {
   shell.openExternal(url);
 });
+
+// Start sync/copy operation
+ipcMain.on("sync:start", async (event, options: { sourceDir: string; destinationDir: string; deleteMode: boolean }) => {
+  const { default: driveCompression } = await import("../tools/driveCompression.js");
+
+  // Throttle progress updates to prevent UI freezing
+  let lastProgressSent = 0;
+  let lastProgressData: any = null;
+  const THROTTLE_MS = 300;
+
+  driveCompression({
+    sourceDir: options.sourceDir,
+    destinationDir: options.destinationDir,
+    delete: options.deleteMode,
+    progressEvent: (data) => {
+      const now = Date.now();
+      lastProgressData = data;
+
+      // Only send if enough time has passed since last update
+      if (now - lastProgressSent >= THROTTLE_MS) {
+        event.sender.send("sync:progress", data);
+        lastProgressSent = now;
+      }
+    },
+    log: (line) => {
+      event.sender.send("sync:log", line);
+    },
+    end: (error, duration) => {
+      // Send final progress update if there's one pending
+      if (lastProgressData && Date.now() - lastProgressSent >= THROTTLE_MS) {
+        event.sender.send("sync:progress", lastProgressData);
+      }
+      event.sender.send("sync:end", { error, duration });
+    },
+  });
+});

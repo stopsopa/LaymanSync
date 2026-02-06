@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import DirectorySelector from './components/DirectorySelector';
 import DirectoryDisplay from './components/DirectoryDisplay';
@@ -24,6 +24,34 @@ function App() {
   const [completionStatus, setCompletionStatus] = useState<'success' | 'error' | null>(null);
   const [completionMessage, setCompletionMessage] = useState<string | null>(null);
   const [completionDuration, setCompletionDuration] = useState<string | null>(null);
+
+  // Set up IPC event listeners
+  useEffect(() => {
+    const unsubProgress = window.electronAPI.onSyncProgress((data: ProgressData) => {
+      setProgress(data);
+    });
+
+    const unsubLog = window.electronAPI.onSyncLog((line: string) => {
+      setLogs(prev => [...prev, line]);
+    });
+
+    const unsubEnd = window.electronAPI.onSyncEnd((result: { error: string | null; duration: string }) => {
+      setCompletionDuration(result.duration);
+      if (result.error) {
+        setCompletionStatus('error');
+        setCompletionMessage(result.error);
+      } else {
+        setCompletionStatus('success');
+      }
+      setIsProcessing(false);
+    });
+
+    return () => {
+      unsubProgress();
+      unsubLog();
+      unsubEnd();
+    };
+  }, []);
 
   const resetState = () => {
     setProgress(null);
@@ -60,48 +88,12 @@ function App() {
     resetState();
     setIsProcessing(true);
 
-    // TODO: Phase 4 - Implement actual driveCompression call
-    // For now, simulate the process with mock logs and progress
-    const mockLogs = [
-      `Starting ${deleteMode ? 'sync' : 'copy'} operation...`,
-      `Source: ${sourceDir}`,
-      `Destination: ${destinationDir}`,
-      `Mode: ${deleteMode ? 'rclone sync (with delete)' : 'rclone copy'}`,
-      'Scanning source directory...',
-      'Calculating total size...',
-      'Starting transfer...',
-    ];
-
-    // Add initial logs
-    mockLogs.forEach((log, index) => {
-      setTimeout(() => {
-        setLogs(prev => [...prev, log]);
-      }, index * 200);
+    // Start the actual rclone operation via IPC
+    window.electronAPI.startSync({
+      sourceDir,
+      destinationDir,
+      deleteMode,
     });
-
-    // Simulate progress updates
-    let currentProgress = 0;
-    const progressInterval = setInterval(() => {
-      currentProgress += 10;
-      if (currentProgress <= 100) {
-        setProgress({
-          progressPercentHuman: `${currentProgress}%`,
-          totalTimePassedHuman: `${Math.floor(currentProgress / 20)}s`,
-          estimatedTotalTimeHuman: `${Math.floor(100 / 20)}s`,
-          estimatedRemainingTimeHuman: `${Math.floor((100 - currentProgress) / 20)}s`,
-        });
-        setLogs(prev => [...prev, `Progress: ${currentProgress}%`]);
-      }
-      if (currentProgress >= 100) {
-        clearInterval(progressInterval);
-        setTimeout(() => {
-          setLogs(prev => [...prev, 'Transfer complete!']);
-          setCompletionStatus('success');
-          setCompletionDuration('5s');
-          setIsProcessing(false);
-        }, 500);
-      }
-    }, 500);
   };
 
   const canStart = !isProcessing && sourceDir !== null && destinationDir !== null;
