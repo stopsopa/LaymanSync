@@ -97,9 +97,20 @@ const SyncProgress: React.FC<SyncProgressProps> = ({
       {completionStatus && (
         <>
           <div className="progress-bar-container">
+            <div className="status-icon-container">
+              {completionStatus === 'success' ? (
+                <svg className="status-icon success" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              ) : (
+                <svg className="status-icon error" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              )}
+            </div>
             <div className="progress-bar">
               <div 
-                className="progress-fill active" 
+                className={`progress-fill ${completionStatus === 'success' ? 'success' : 'error'}`}
                 style={{ width: '100%' }} 
               />
               <div className="progress-text">100%</div>
@@ -141,6 +152,16 @@ const SyncProgress: React.FC<SyncProgressProps> = ({
                 <p className="error-message">{completionMessage}</p>
               )}
             </div>
+          </div>
+          <div className="progress-actions">
+            <div></div>
+            <button
+              className={`start-button ${deleteMode ? 'sync-mode' : 'copy-mode'}`}
+              onClick={onStart}
+              disabled={!canStart}
+            >
+              {deleteMode ? 'Start Sync Again' : 'Start Copy Again'}
+            </button>
           </div>
         </>
       )}
