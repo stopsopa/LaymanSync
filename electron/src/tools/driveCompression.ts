@@ -2,8 +2,8 @@ import { spawn } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs/promises";
-import generateFFMPEGParams from "./generateFFMPEGParams.js";
-import type { Params } from "./generateFFMPEGParams.js";
+import generateRcloneParams from "./generateRcloneParams.js";
+import type { Params } from "./generateRcloneParams.js";
 import { extractMetadata } from "./extractMetadata.js";
 import scaleWandH from "./scaleWandH.js";
 import { timeHumanReadable } from "./timeHumanReadable.js";
@@ -135,7 +135,7 @@ export default async function driveCompression(options: DriveCompressionOptions)
       passLogFilePrefix,
     };
 
-    const { firstPass, secondPass } = generateFFMPEGParams(finalParams);
+    const { firstPass, secondPass } = generateRcloneParams(finalParams);
 
     /**
      * Helper to run an FFmpeg pass and report progress
@@ -237,7 +237,9 @@ export default async function driveCompression(options: DriveCompressionOptions)
             resolve();
           } else {
             reject(
-              new Error(`FFmpeg pass ${passNumber} failed with exit code ${code}${stderr ? `: ${stderr.trim()}` : ""}`),
+              new Error(
+                `driveCompression.ts error: FFmpeg pass ${passNumber} failed with exit code ${code}${stderr ? `: ${stderr.trim()}` : ""}`,
+              ),
             );
           }
         });

@@ -32,7 +32,7 @@ for (const height of heightResolutions) {
     //   scale: false,
     progressEvent: (error, data) => {
       if (error) {
-        console.error(`Progress error: ${error}`);
+        console.error(`driveCompression.run.ts error: Progress error: ${error}`);
         return;
       }
       const {
@@ -50,7 +50,9 @@ for (const height of heightResolutions) {
 
     end: (step, error, duration) => {
       if (error) {
-        console.error(`Compression failed during ${step} pass (step duration: ${duration}): ${error}`);
+        console.error(
+          `driveCompression.run.ts error: Compression failed during ${step} pass (step duration: ${duration}): ${error}`,
+        );
         // process.exit(1);
       } else {
         console.log(`end(): Step ${step} finished successfully! (step duration: ${duration})`);

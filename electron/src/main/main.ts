@@ -7,7 +7,7 @@ import { promisify } from "util";
 import fs from "fs/promises";
 import { extractMetadata } from "../tools/extractMetadata.js";
 import driveCompression from "../tools/driveCompression.js";
-import generateFFMPEGParams, { generateFFMPEGParamsStrings } from "../tools/generateFFMPEGParams.js";
+import generateRcloneParams, { generateRcloneParamsStrings } from "../tools/generateRcloneParams.js";
 import scaleWandH from "../tools/scaleWandH.js";
 import { getFFmpegPath, getFFprobePath, getVersions } from "./bins.js";
 
@@ -191,7 +191,7 @@ ipcMain.handle("video:validate", async (_event, filePath: string, settings: any)
     const meta = await extractMetadata(getFFprobePath(), filePath);
 
     // Calculate initial output path at ingestion
-    const { secondPass } = generateFFMPEGParams({
+    const { secondPass } = generateRcloneParams({
       sourceFile: filePath,
       scale: !!settings.scale,
       videoWidth: settings.videoWidth ?? meta.width!,
@@ -335,7 +335,7 @@ ipcMain.handle("video:getCommand", async (_event, args: { sourceFile: string; se
     videoWidth = scaled.width;
   }
 
-  const result = generateFFMPEGParamsStrings({
+  const result = generateRcloneParamsStrings({
     sourceFile,
     scale: !!settings.scale,
     videoWidth,
