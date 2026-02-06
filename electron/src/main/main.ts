@@ -35,8 +35,8 @@ async function createWindow() {
   const iconPath = path.join(appPath, "dist/icon.png");
 
   mainWindow = new BrowserWindow({
-    width: 1100,
-    height: 700,
+    width: 1280,
+    height: 850,
     icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.js"),

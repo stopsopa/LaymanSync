@@ -10,6 +10,7 @@ function App() {
   const [progress, setProgress] = useState<any>(null);
   const [rcloneVersion, setRcloneVersion] = useState<string>('rclone version loading...');
   const [status, setStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
+  const [errorModal, setErrorModal] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
 
   const logEndRef = useRef<HTMLDivElement>(null);
 
@@ -44,6 +45,7 @@ function App() {
       if (error) {
         setStatus('error');
         setLogs((prev) => [...prev, `[ERROR] ${error}`, `Final duration: ${duration}`]);
+        setErrorModal({ show: true, message: error });
       } else {
         setStatus('success');
         setLogs((prev) => [...prev, `[SUCCESS] Process completed successfully.`, `Final duration: ${duration}`]);
@@ -126,8 +128,31 @@ function App() {
     resetProcessState();
   };
 
+  const handleCloseErrorModal = () => {
+    setErrorModal({ show: false, message: '' });
+    handleReset();
+  };
+
   return (
     <div className="app-container">
+      {/* ERROR MODAL */}
+      {errorModal.show && (
+        <div className="modal-overlay">
+          <div className="modal-content card">
+            <div style={{ color: 'var(--aws-red)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '15px' }}>
+              Execution Error
+            </div>
+            <div style={{ marginBottom: '20px', wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '0.9rem' }}>
+              {errorModal.message}
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <button className="aws-button aws-button-primary" onClick={handleCloseErrorModal}>
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* 1. MANUAL SELECTORS - Hidden during processing */}
       {!isRunning && (
         <div className="manual-selectors card">
