@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Gui for rclone we will have to allow user to provide two directories - source and destination. 
+Gui for rclone we will have to allow user to provide two directories - source and destination.
 then allow to choose from copy or sync - by ticking "delete" flag with proper warnings if sync mode will be selected.
 
 Entire logic is based on the @driveCompression.ts file.
@@ -32,12 +32,14 @@ Build the core layout and implement the tooling for allowing user to select 2 fo
 ### UI Sections
 
 Our UI will have three layers one under another from top to bottom as follow:
-1) Let's call it MANUAL SELECTORS - it will be top div clearly divided to two parts - left and right. 
+
+1. Let's call it MANUAL SELECTORS - it will be top div clearly divided to two parts - left and right.
    In each side we will have identical UI with just labels different: on the left label will say "source directory" on the right label will say "destination directory".
    Now let's focus on the descripton of layut of one side:
    On top there will be dropzone block - reasonably sized to allow user to drag and drop directory conveniently.
    below that there will be <input type="file"> to allow user to select directory manually with native OS dialog.
-2) Second section from the top we will have section which will present source and destination directory but this time not divided to left and right but top and bottom:
+
+2. Second section from the top we will have section which will present source and destination directory but this time not divided to left and right but top and bottom:
    It will have to present decent ui stating on the left "source directory" and on the right from that label full path (absolute path) presenting source.
    Below that the same "destination directory" and on the right from that label full path (absolute path) presenting full path to destination directory.
 
@@ -46,16 +48,39 @@ Our UI will have three layers one under another from top to bottom as follow:
    on the very end of these two lines let's have button "show in finder" which once user click will open finder on that directory.
    Both lines presenting source and destination directory will have to have separate button "show in finder".
 
-3) below taht we will have block which will accommodate checkbox to switch 'delete' mode which by default will be off. but once user decide to switch it on then we will show appropriate warning   informing user that this might be dangerous in certain circumstances. and then that block will generally overview what is the destructive nature of switching `rclone copy` for `rclone sync`.
+3. below taht we will have block which will accommodate checkbox to switch 'delete' mode which by default will be off. but once user decide to switch it on then we will show appropriate warning informing user that this might be dangerous in certain circumstances. and then that block will generally overview what is the destructive nature of switching `rclone copy` for `rclone sync`.
 
-4) Below that we will have progress bar taking full width of the app. with all stats under it
-   this sectin will also have button on the right "start copy" or "start sync" depending on the mode selected in step 3.   
+4. Below that we will have progress bar taking full width of the app.
+   (we can reuse progress bar from this project)
+   with all stats under it
+   this sectin will also have button on the right "start copy" or "start sync" depending on the mode selected in step 3.  
+    In this section before we start copying/syncing present nice empty progressbar.
+   When copying/syncing will finish you can remove progress bar and replace it with final information of success or failure. with final stats.
+   Both will be extracted from end() event from @driveCompression.ts
+   After cloning will be finished user will be allowed to select new source and destination directories.
+   Immediatelly when user will start interacting with dropzones or <input type="files">
+   reset state of this block to original state (empty progress bar). and remove success/failure message with stats.
+   Basically we have to have single function which once called will reset this block to original state.
 
-5) this section which will take all rest of available space will be block wiich will  show full log collected from rclone process via event 
+5. this section which will take all rest of available space will be block wiich will show full log collected from rclone process via event
 
    log: (line) => {
-    from 
-    await driveCompression({
+   from
+   await driveCompression({
+
+# during copying/syncing
+
+during copying/syncing user won't be allowed to interact with UI for switching source and destination directories.
+We can hide section 1) MANUAL SELECTORS. but le'ts keep section 2) presenting source and destination directories - this one will be compact enough to don't take too much space.
+Once copying finishes we will have to show this block again regardless of success or failure.
+Once user start interacting with anything we have to reset all states to state which is normally presented on the app start.
+
+also logs should be cleaned in the section 5)
+
+# footer
+
+in the footer (which we can repurpose from this project, put homepage link https://github.com/stopsopa/LaymanSync)
+and on the left side (also repurpose) let's version of rclone bundled with the app.
 
 ## UI/UX Design Goals (AWS Console Style)
 
@@ -68,5 +93,3 @@ Our UI will have three layers one under another from top to bottom as follow:
 - **Spacing**: Generous padding and consistent alignment.
 - **Interactivity**: Hover states for buttons and rows, smooth modal transitions.
 - ffmpeg embedded in the app.
-
-
