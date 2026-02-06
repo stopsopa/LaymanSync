@@ -105,3 +105,16 @@ update window title from "WebMCompressor" to "LaymanSync"
 
 Make sure to wrap final call for @driveCompression.ts with try catch block to handle any potential errors.
 If any error will happen then show modal with the error message. and once user dismiss that modal then reset progress bar back to initial state
+
+# handle special case
+
+Execution Error
+Process exited with code 7
+
+when using patsh 
+/Users/szdz/Workspace/STOPSOPA__LaymanSync/untitled folder 2/untitled folder
+/Users/szdz/Workspace/STOPSOPA__LaymanSync/untitled folder 2
+
+this is special case when syncing from child directory to directory on the same path but higher wil return exit code 7 for rclone sync
+
+make this error more readable what does it mean

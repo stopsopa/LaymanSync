@@ -44,8 +44,17 @@ function App() {
       setProgress((prev: any) => ({ ...prev, progressPercentHuman: '100%' }));
       if (error) {
         setStatus('error');
-        setLogs((prev) => [...prev, `[ERROR] ${error}`, `Final duration: ${duration}`]);
-        setErrorModal({ show: true, message: error });
+        
+        let friendlyError = error;
+        // The engine returns "Process exited with code X"
+        if (error.includes('code 7')) {
+          friendlyError = "Rclone error (7): Overlapping directories detected. You cannot sync a folder into its own parent or subfolder as it creates a circular reference.";
+        } else if (error.includes('code 1')) {
+          friendlyError = "Rclone error (1): Syntax or usage error. Please check your paths and settings.";
+        }
+
+        setLogs((prev) => [...prev, `[ERROR] ${friendlyError}`, `Final duration: ${duration}`]);
+        setErrorModal({ show: true, message: friendlyError });
       } else {
         setStatus('success');
         setLogs((prev) => [...prev, `[SUCCESS] Process completed successfully.`, `Final duration: ${duration}`]);
