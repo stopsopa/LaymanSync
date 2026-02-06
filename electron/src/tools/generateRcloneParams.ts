@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { escapeFilePath } from "./escapeFilePath.js";
 
 /**
  * Logic for generating rclone parameters.
@@ -97,5 +98,6 @@ export default function generateRcloneParams<P extends Params>(params: P): Rclon
  * Helper to get the parameters as a flat string or array of strings for execution.
  */
 export function generateRcloneParamsStrings<P extends Params>(params: P) {
-  return generateRcloneParams(params).flat().join(" ");
+  const [action, flags, source, dest] = generateRcloneParams(params);
+  return [action, ...flags, escapeFilePath(source), escapeFilePath(dest)].join(" ");
 }

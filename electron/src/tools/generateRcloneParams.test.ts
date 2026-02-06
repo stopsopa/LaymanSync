@@ -66,7 +66,26 @@ describe("generateRcloneParams", () => {
       destinationDir: tmpDest,
     });
 
-    assert.equal(args, `copy -v -P --transfers 4 --fast-list --stats=1s --stats-one-line ${tmpSource} ${tmpDest}`);
+    assert.equal(args, `copy -v -P --transfers 4 --fast-list --stats=1s --stats-one-line '${tmpSource}' '${tmpDest}'`);
+  });
+
+  it("should handle paths with special characters correctly in string version", () => {
+    // We can't easily create a path with quotes on all OSs, but we can mock or use spaces
+    const spaceSource = path.join(tmpBase, "source with space");
+    const spaceDest = path.join(tmpBase, "dest with space");
+    fs.mkdirSync(spaceSource);
+    fs.mkdirSync(spaceDest);
+
+    const args = generateRcloneParamsStrings({
+      delete: true,
+      sourceDir: spaceSource,
+      destinationDir: spaceDest,
+    });
+
+    assert.equal(
+      args,
+      `sync -v -P --transfers 4 --fast-list --stats=1s --stats-one-line '${spaceSource}' '${spaceDest}'`,
+    );
   });
 
   it("should throw error if directory does not exist", () => {
