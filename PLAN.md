@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-Gui for rclone we will have to allow user to provide two directories - source and destination.
+We will remodel existing WebM Compressor to build different application.
+And we will focus on reusing and just refactoring only what is needed to build
+gui for rclone we will have to allow user to provide two directories - source and destination.
 then allow to choose from copy or sync - by ticking "delete" flag with proper warnings if sync mode will be selected.
 
 Entire logic is based on the @driveCompression.ts file.
@@ -62,6 +64,8 @@ Our UI will have three layers one under another from top to bottom as follow:
    reset state of this block to original state (empty progress bar). and remove success/failure message with stats.
    Basically we have to have single function which once called will reset this block to original state.
 
+   on the left to progress bar there should be also some spinning element to show progress even when library is not emiting events indicating progress. To avoid confusing user when he/she doesn't see anything moving.
+
 5. this section which will take all rest of available space will be block wiich will show full log collected from rclone process via event
 
    log: (line) => {
@@ -93,3 +97,11 @@ and on the left side (also repurpose) let's version of rclone bundled with the a
 - **Spacing**: Generous padding and consistent alignment.
 - **Interactivity**: Hover states for buttons and rows, smooth modal transitions.
 - ffmpeg embedded in the app.
+
+
+# final touch
+
+update window title from "WebMCompressor" to "LaymanSync"
+
+Make sure to wrap final call for @driveCompression.ts with try catch block to handle any potential errors.
+If any error will happen then show modal with the error message. and once user dismiss that modal then reset progress bar back to initial state

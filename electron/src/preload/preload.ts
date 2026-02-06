@@ -7,47 +7,42 @@ contextBridge.exposeInMainWorld("electronAPI", {
   loadConfig: () => ipcRenderer.invoke("config:load"),
   saveConfig: (config: any) => ipcRenderer.invoke("config:save", config),
 
-  // Video validation
-  validateVideo: (filePath: string, settings: any) => ipcRenderer.invoke("video:validate", filePath, settings),
-  getOutputPath: (inputPath: string) => ipcRenderer.invoke("video:getOutputPath", inputPath),
-
-  // New Compression IPC (Phase 4)
-  startCompression: (args: {
-    id: string;
-    sourceFile: string;
-    settings: any;
-    metadata: { width: number; height: number; fps: number };
-  }) => ipcRenderer.send("compression:start", args),
-  onCompressionProgress: (callback: (id: string, progress: any) => void) => {
-    const listener = (_event: any, data: { id: string; progress: any }) => callback(data.id, data.progress);
-    ipcRenderer.on("compression:progress", listener);
-    return () => ipcRenderer.removeListener("compression:progress", listener);
-  },
-  onCompressionEnd: (callback: (id: string, step: string, error: string | null, duration: string) => void) => {
-    const listener = (_event: any, data: { id: string; step: string; error: string | null; duration: string }) =>
-      callback(data.id, data.step, data.error, data.duration);
-    ipcRenderer.on("compression:end", listener);
-    return () => ipcRenderer.removeListener("compression:end", listener);
-  },
-
-  // Process count for close confirmation
-  setProcessCount: (count: number) => ipcRenderer.send("process:count", count),
+  // Directory Selection
+  selectDirectory: () => ipcRenderer.invoke("dialog:selectDirectory"),
 
   // Tool to get file path from File object (standard in modern Electron)
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
 
-  // Reveal file in Finder/Explorer
-  revealVideo: (filePath: string) => ipcRenderer.send("video:reveal", filePath),
+  // Reveal in Finder/Explorer
+  revealPath: (path: string) => ipcRenderer.send("app:revealPath", path),
 
-  // Get full ffmpeg command for clipboard (Phase 4)
-  getFFMPEGCommand: (args: { sourceFile: string; settings: any; metadata: any }) =>
-    ipcRenderer.invoke("video:getCommand", args),
-
-  // Get tool versions (Phase 4)
-  getAppVersions: () => ipcRenderer.invoke("app:getVersions"),
+  // App Versions
+  getRcloneVersion: () => ipcRenderer.invoke("app:getRcloneVersion"),
 
   // Open URL in system browser
   openExternal: (url: string) => ipcRenderer.send("app:openExternal", url),
+
+  // Process count
+  setProcessCount: (count: number) => ipcRenderer.send("process:count", count),
+
+  // rclone events (for Phase 4)
+  onLog: (callback: (line: string) => void) => {
+    const listener = (_event: any, line: string) => callback(line);
+    ipcRenderer.on("rclone:log", listener);
+    return () => ipcRenderer.removeListener("rclone:log", listener);
+  },
+  onProgress: (callback: (data: any) => void) => {
+    const listener = (_event: any, data: any) => callback(data);
+    ipcRenderer.on("rclone:progress", listener);
+    return () => ipcRenderer.removeListener("rclone:progress", listener);
+  },
+  onEnd: (callback: (error: string | null, duration: string) => void) => {
+    const listener = (_event: any, data: { error: string | null; duration: string }) =>
+      callback(data.error, data.duration);
+    ipcRenderer.on("rclone:end", listener);
+    return () => ipcRenderer.removeListener("rclone:end", listener);
+  },
+  startRclone: (options: any) => ipcRenderer.send("rclone:start", options),
 });
 
 // Type definition for window.electronAPI
@@ -56,36 +51,16 @@ declare global {
     electronAPI: {
       loadConfig: () => Promise<any>;
       saveConfig: (config: any) => Promise<{ success: boolean; error?: string }>;
-      validateVideo: (
-        filePath: string,
-        settings: any,
-      ) => Promise<{
-        success: boolean;
-        width?: number;
-        height?: number;
-        fps?: number;
-        durationMs?: number;
-        size?: number;
-        outputPath?: string;
-        error?: string;
-      }>;
-      getOutputPath: (inputPath: string) => Promise<string>;
-      startCompression: (args: {
-        id: string;
-        sourceFile: string;
-        settings: any;
-        metadata: { width: number; height: number; fps: number };
-      }) => void;
-      onCompressionProgress: (callback: (id: string, progress: any) => void) => () => void;
-      onCompressionEnd: (
-        callback: (id: string, step: string, error: string | null, duration: string) => void,
-      ) => () => void;
-      setProcessCount: (count: number) => void;
+      selectDirectory: () => Promise<string | null>;
       getPathForFile: (file: File) => string;
-      revealVideo: (filePath: string) => void;
-      getFFMPEGCommand: (args: { sourceFile: string; settings: any; metadata: any }) => Promise<string>;
-      getAppVersions: () => Promise<{ ffmpeg: string; ffprobe: string }>;
+      revealPath: (path: string) => void;
+      getRcloneVersion: () => Promise<string>;
       openExternal: (url: string) => void;
+      setProcessCount: (count: number) => void;
+      onLog: (callback: (line: string) => void) => () => void;
+      onProgress: (callback: (data: any) => void) => () => void;
+      onEnd: (callback: (error: string | null, duration: string) => void) => () => void;
+      startRclone: (options: any) => void;
     };
   }
 }

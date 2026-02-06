@@ -10,8 +10,9 @@
   --aws-white: #ffffff;
   --aws-green: #1d8102;
   --aws-red: #d13212;
-  --aws-font: "Amazon Ember", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  
+  --aws-font:
+    "Amazon Ember", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -22,7 +23,9 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -52,10 +55,11 @@ html, body, #root {
 }
 
 .section-title {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 700;
   margin-bottom: var(--spacing-md);
   color: var(--aws-text-dark);
+  text-transform: uppercase;
 }
 
 /* Scrollbar Style */
@@ -85,6 +89,7 @@ html, body, #root {
   cursor: pointer;
   border: 1px solid transparent;
   transition: background-color 0.1s;
+  font-size: 0.9rem;
 }
 
 .aws-button-primary {
@@ -94,11 +99,6 @@ html, body, #root {
 
 .aws-button-primary:hover {
   background-color: var(--aws-orange-hover);
-}
-
-.aws-button-success {
-  background-color: var(--aws-green);
-  color: var(--aws-white);
 }
 
 .aws-button-secondary {
@@ -117,75 +117,200 @@ html, body, #root {
   filter: grayscale(0.5);
 }
 
-/* Common Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 28, 36, 0.5); 
+/* LaymanSync specific styles */
+
+.manual-selectors {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  backdrop-filter: blur(1px);
+  gap: var(--spacing-md);
 }
 
-.modal-content {
-  background: var(--aws-white);
-  border: 1px solid var(--aws-border);
-  border-radius: 2px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+.selector-side {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
-.modal-header {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--aws-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #fafafa;
-}
-
-.modal-header h2, .modal-header .modal-title {
-  font-size: 1rem;
+.selector-side label {
   font-weight: 700;
-  margin: 0;
-  color: var(--aws-text-dark);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--aws-text-light);
 }
 
-.modal-header .close-btn, .modal-header .close-x-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--aws-text-light);
-  cursor: pointer;
-  line-height: 1;
-  padding: 0;
+.dropzone {
+  border: 2px dashed var(--aws-border);
+  border-radius: 4px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  background-color: #fafafa;
+  color: var(--aws-text-light);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  padding: 10px;
 }
 
-.modal-header .close-btn:hover, .modal-header .close-x-btn:hover {
-  color: var(--aws-text-dark);
+.dropzone:hover,
+.dropzone.active {
+  border-color: var(--aws-blue);
+  background-color: #ebf5ff;
 }
 
-.modal-body {
-  padding: var(--spacing-md);
+.path-display-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.path-line {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.path-label {
+  width: 150px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--aws-text-light);
+  font-size: 0.75rem;
+}
+
+.path-value {
   flex: 1;
-  overflow-y: auto;
+  font-family: monospace;
+  background-color: #f8f9f9;
+  padding: 6px 10px;
+  border: 1px solid var(--aws-border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
 }
 
-.modal-footer {
-  padding: var(--spacing-md);
+.delete-mode-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.warning-box {
+  background-color: #fffaf0;
+  border: 1px solid #ff9900;
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: #c05d00;
+  font-size: 0.85rem;
+  border-radius: 2px;
+}
+
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 16px;
+  background-color: #e9ebec;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--aws-blue);
+  transition: width 0.3s ease;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--aws-text-light);
+}
+
+.logs-section {
+  flex: 1;
+  background-color: #16191f;
+  color: #e9ebec;
+  padding: var(--spacing-sm);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  overflow-y: auto;
+  border-radius: 2px;
+}
+
+.log-line {
+  margin: 1px 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px var(--spacing-md);
   border-top: 1px solid var(--aws-border);
+  background-color: var(--aws-white);
+  font-size: 0.75rem;
+  color: var(--aws-text-light);
+}
+
+.footer a {
+  color: var(--aws-blue);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.start-btn-container {
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-md);
-  background-color: #fafafa;
+  margin-top: 0;
+}
+
+/* Spinner for progress area */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--aws-orange);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 15px;
+  vertical-align: middle;
+}
+
+.footer-link {
+  color: var(--aws-blue);
+  text-decoration: none;
+  font-weight: 700;
+  transition: opacity 0.2s;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+.hidden {
+  display: none !important;
 }
