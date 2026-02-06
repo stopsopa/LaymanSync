@@ -1,279 +1,130 @@
 import { spawn } from "node:child_process";
-import os from "node:os";
-import path from "node:path";
-import fs from "node:fs/promises";
 import generateRcloneParams from "./generateRcloneParams.js";
-import type { Params } from "./generateRcloneParams.js";
-import { extractMetadata } from "./extractMetadata.js";
-import scaleWandH from "./scaleWandH.js";
 import { timeHumanReadable } from "./timeHumanReadable.js";
 import { determineBinaryAbsolutePath } from "./determineBinaryAbsolutePath.js";
 
-export type CompressionStep = "first" | "second";
-
 export type ProgressData = {
   progressPercentHuman: string;
-  progressPercentNum: number;
-  totalTimePassedMs: number;
   totalTimePassedHuman: string;
-  estimatedTotalTimeMs: number;
   estimatedTotalTimeHuman: string;
-  estimatedRemainingTimeMs: number;
   estimatedRemainingTimeHuman: string;
-  firstPassDurationMs: number | null;
-  firstPassDurationHuman: string;
+};
+
+export type DriveCompressionOptions = {
+  sourceDir: string;
+  destinationDir: string;
+  delete?: boolean;
+  progressEvent?: (data: ProgressData) => void;
+  log?: (line: string) => void;
+  end: (error: string | null, duration: string) => void;
 };
 
 /**
- * Full DriveCompressionOptions type fields:
- * {
- *   sourceFile: string;
- *   ffmpegPath?: string;
- *   ffprobePath?: string;
- *   date?: string;
- *
- *   scale: boolean;
- *   videoHeight?: number; // At least one of videoHeight or videoWidth must be provided
- *   videoWidth?: number;  // At least one of videoHeight or videoWidth must be provided
- *
- *   progressEvent?: (error: string | null, data: ProgressData) => void;
- *   end: (step: CompressionStep, error: string | null, duration: string) => void;
- *
- *   extra?: string[];
- *   extrafirst?: string[];
- *   extrasecond?: string[];
- * }
- */
-export type DriveCompressionOptions = Omit<Params, "frameRate" | "videoHeight" | "videoWidth"> &
-  (
-    | { videoHeight: number; videoWidth?: number }
-    | { videoWidth: number; videoHeight?: number }
-    | { videoHeight: number; videoWidth: number }
-  ) & {
-    progressEvent?: (error: string | null, data: ProgressData) => void;
-    end: (step: CompressionStep, error: string | null, duration: string) => void;
-    ffmpegPath?: string;
-    ffprobePath?: string;
-    id?: string;
-  };
-
-/**
- * Sends a message back to the main process or triggers progress callbacks.
+ * Executes a single rclone command and tracks its progress.
  */
 export default async function driveCompression(options: DriveCompressionOptions) {
-  const {
-    sourceFile,
+  const { sourceDir, destinationDir, progressEvent, log, end } = options;
 
-    scale = false,
+  const mainExec = determineBinaryAbsolutePath();
 
-    date,
-    extra,
-    extrafirst,
-    extrasecond,
-    progressEvent,
-    end,
-    ffmpegPath,
-    ffprobePath,
-    id = "ffmpeg2pass",
-  } = options;
+  const [action, flags, source, dest] = generateRcloneParams({
+    sourceDir,
+    destinationDir,
+    delete: options.delete ?? false,
+  });
 
-  let resolveFfmpegPath = ffmpegPath;
-  if (!resolveFfmpegPath) {
-    resolveFfmpegPath = determineBinaryAbsolutePath();
-  }
+  const args = [action, ...flags, source, dest];
 
-  let resolveFfprobePath = ffprobePath;
-  if (!resolveFfprobePath) {
-    resolveFfprobePath = determineBinaryAbsolutePath();
-  }
+  const startTime = Date.now();
 
-  let { videoHeight, videoWidth } = options;
-
-  let currentStep: CompressionStep = "first";
-  const overallStartTime = Date.now();
-  let firstPassDurationMs: number | null = null;
-  let secondPassStartTime: number | null = null;
-  let stepStartTime = Date.now();
-
-  // 1. Setup a stable, writable directory for pass logs
-  const logsDir = path.join(os.tmpdir(), "webm-compressor", "ffmpeg2pass");
-  // passLogFilePrefix includes the unique Job ID to prevent collisions during parallel processing
-  const passLogFilePrefix = path.join(logsDir, id);
-
-  try {
-    // Ensure the logs directory exists
-    await fs.mkdir(logsDir, { recursive: true });
-    console.log(`[DriveCompression] Using log prefix: ${passLogFilePrefix}`);
-
-    // 2. Extract Metadata
-    const {
-      durationMs,
-      height: metaHeight,
-      width: metaWidth,
-      fps: metaFps,
-    } = await extractMetadata(resolveFfprobePath, sourceFile);
-
-    if (scale) {
-      ({ height: videoHeight, width: videoWidth } = scaleWandH({ height: metaHeight, width: metaWidth }, {
-        height: videoHeight,
-        width: videoWidth,
-      } as any));
-    }
-
-    // 2. Prepare Parameters
-    // We use extracted metadata to fill in missing required parameters or ensure accuracy
-    const finalParams: Params = {
-      sourceFile,
-      videoHeight: (scale ? videoHeight : metaHeight) as number,
-      videoWidth: (scale ? videoWidth : metaWidth) as number,
-      frameRate: metaFps,
-      scale,
-      date,
-      extra,
-      extrafirst,
-      extrasecond,
-      passLogFilePrefix,
-    };
-
-    const { firstPass, secondPass } = generateRcloneParams(finalParams);
-
+  return new Promise<void>((resolve) => {
     /**
-     * Helper to run an FFmpeg pass and report progress
+     * Internal state to avoid duplicate progress events if needed,
+     * although rclone with 1s stats interval is fine.
      */
-    const runPass = (flattenedArgs: string[], passNumber: number) => {
-      return new Promise<void>((resolve, reject) => {
-        const hasProgress = flattenedArgs.includes("-progress");
+    let lastPercent = "";
 
-        if (passNumber === 2) {
-          secondPassStartTime = Date.now();
+    const child = spawn(mainExec, args);
+
+    let stdoutRemainder = "";
+    let stderrRemainder = "";
+
+    const handleData = (data: Buffer, isStdout: boolean) => {
+      const text = (isStdout ? stdoutRemainder : stderrRemainder) + data.toString();
+      const lines = text.split(/\r?\n/);
+      const remainder = lines.pop() || "";
+
+      if (isStdout) {
+        stdoutRemainder = remainder;
+      } else {
+        stderrRemainder = remainder;
+      }
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+
+        if (log) {
+          log(line);
         }
 
-        const child = spawn(resolveFfmpegPath, flattenedArgs);
+        // Parse progress from rclone aggregate stats line
+        // Example: 299.147 MiB / 662.034 MiB, 45%, 0 B/s, ETA - (xfr#8137/18149)
+        // We look for a line that starts with counts (e.g. "1.2 MiB / 10 MiB, 12%")
+        const match = line.match(/^\d*.\d* [^\s]+ \/ \d*.\d* [^\s]+, (\d+)%, \d+.*$/);
+        if (match && match[1]) {
+          // Trigger progressEvent only if the percentage changed
+          if (match[1] !== lastPercent) {
+            lastPercent = match[1];
 
-        let stderr = "";
-        let stdoutBuffer = "";
+            const progressPercentNum = parseInt(match[1], 10);
 
-        if (hasProgress) {
-          child.stdout.on("data", (data: Buffer) => {
-            stdoutBuffer += data.toString();
-            const lines = stdoutBuffer.split("\n");
-            stdoutBuffer = lines.pop() || "";
+            const now = Date.now();
+            const totalTimePassedMs = now - startTime;
 
-            for (const line of lines) {
-              // Check for progress indicators
-              const match = line.match(/out_time_ms=(\d+)/) || line.match(/out_time_us=(\d+)/);
-              if (match) {
-                const val = parseInt(match[1], 10);
+            let estimatedRemainingTimeMs = 0;
+            let estimatedTotalTimeMs = 0;
 
-                // WARNNG: Leave this comment
-                // const currentMs = line.startsWith("out_time_ms")
-                //   ? val
-                //   : val / 1000;
-                // //   out_time_us=1066667 from ffmpeg logs it seems we have both with the same value which is a bug
-                // //   out_time_ms=1066667 and it it MICROseconds, not milliseconds
-                // WARNNG: Leave this comment
-
-                const currentMs = val / 1000;
-
-                if (durationMs > 0 && progressEvent && secondPassStartTime) {
-                  // Progress within this pass (0-100)
-                  const passProgress = Math.min(100, (currentMs / durationMs) * 100);
-
-                  const progress = parseFloat(passProgress.toFixed(2));
-
-                  const now = Date.now();
-                  const totalTimePassedMs = now - overallStartTime;
-                  const secondPassTimePassedMs = now - secondPassStartTime;
-
-                  let estimatedRemainingTimeMs = 0;
-                  let estimatedTotalTimeMs = 0;
-
-                  if (progress > 0) {
-                    const onePercentTimeMs = secondPassTimePassedMs / progress;
-                    estimatedRemainingTimeMs = Math.round((100 - progress) * onePercentTimeMs);
-                    estimatedTotalTimeMs = totalTimePassedMs + estimatedRemainingTimeMs;
-                  }
-
-                  progressEvent(null, {
-                    progressPercentHuman: progress.toFixed(2) + "%",
-                    progressPercentNum: progress,
-                    totalTimePassedMs,
-                    totalTimePassedHuman: timeHumanReadable(totalTimePassedMs),
-                    estimatedTotalTimeMs,
-                    estimatedTotalTimeHuman: timeHumanReadable(estimatedTotalTimeMs),
-                    estimatedRemainingTimeMs,
-                    estimatedRemainingTimeHuman: timeHumanReadable(estimatedRemainingTimeMs),
-                    firstPassDurationMs,
-                    firstPassDurationHuman: firstPassDurationMs ? timeHumanReadable(firstPassDurationMs) : "?",
-                  });
-                }
-              }
+            if (progressPercentNum > 0) {
+              const totalMs = (totalTimePassedMs / progressPercentNum) * 100;
+              estimatedTotalTimeMs = Math.round(totalMs);
+              estimatedRemainingTimeMs = Math.round(totalMs - totalTimePassedMs);
             }
-          });
-        }
 
-        child.stderr.on("data", (data: Buffer) => {
-          stderr += data.toString();
-        });
-
-        child.on("close", (code: number | null) => {
-          if (code === 0) {
-            if (hasProgress && progressEvent && secondPassStartTime) {
-              const now = Date.now();
-              const totalTimePassedMs = now - overallStartTime;
-              progressEvent(null, {
-                progressPercentHuman: "100.00%",
-                progressPercentNum: 100,
-                totalTimePassedMs,
+            if (progressEvent) {
+              progressEvent({
+                progressPercentHuman: `${match[1]}%`,
                 totalTimePassedHuman: timeHumanReadable(totalTimePassedMs),
-                estimatedTotalTimeMs: totalTimePassedMs,
-                estimatedTotalTimeHuman: timeHumanReadable(totalTimePassedMs),
-                estimatedRemainingTimeMs: 0,
-                estimatedRemainingTimeHuman: "0s",
-                firstPassDurationMs,
-                firstPassDurationHuman: firstPassDurationMs ? timeHumanReadable(firstPassDurationMs) : "?",
+                estimatedTotalTimeHuman: progressPercentNum > 0 ? timeHumanReadable(estimatedTotalTimeMs) : "?",
+                estimatedRemainingTimeHuman: progressPercentNum > 0 ? timeHumanReadable(estimatedRemainingTimeMs) : "?",
               });
             }
-            resolve();
-          } else {
-            reject(
-              new Error(
-                `driveCompression.ts error: FFmpeg pass ${passNumber} failed with exit code ${code}${stderr ? `: ${stderr.trim()}` : ""}`,
-              ),
-            );
           }
-        });
-
-        child.on("error", (err: Error) => {
-          reject(err);
-        });
-      });
+        }
+      }
     };
 
-    // 3. Execute First Pass (Analysis phase)
-    currentStep = "first";
-    stepStartTime = Date.now();
-    await runPass(firstPass.flat(2) as string[], 1);
-    firstPassDurationMs = Date.now() - stepStartTime;
-    end("first", null, timeHumanReadable(firstPassDurationMs));
+    child.stdout.on("data", (data) => handleData(data, true));
+    child.stderr.on("data", (data) => handleData(data, false));
 
-    // 4. Execute Second Pass (Encoding phase)
-    currentStep = "second";
-    stepStartTime = Date.now();
-    await runPass(secondPass.flat(2) as string[], 2);
-    end("second", null, timeHumanReadable(Date.now() - overallStartTime));
-  } catch (err: any) {
-    // Notify about the error on the current step
-    end(currentStep, err.message || String(err), timeHumanReadable(Date.now() - stepStartTime));
-  } finally {
-    // 5. Cleanup: Remove the pass logs for THIS job
-    try {
-      // FFmpeg appends '-0.log' to the prefix. We remove that specific file.
-      const logFile = `${passLogFilePrefix}-0.log`;
-      await fs.unlink(logFile).catch(() => {});
-      console.log(`[DriveCompression] Cleaned up log for job: ${id}`);
-    } catch (e) {
-      console.warn(`[DriveCompression] Cleanup failed for job ${id}`, e);
-    }
-  }
+    child.on("error", (err) => {
+      const duration = timeHumanReadable(Date.now() - startTime);
+      end(err.message, duration);
+      resolve();
+    });
+
+    child.on("close", (code) => {
+      // Process remaining content if any
+      if (stdoutRemainder && log) log(stdoutRemainder);
+      if (stderrRemainder && log) log("[stderr] " + stderrRemainder);
+
+      const duration = timeHumanReadable(Date.now() - startTime);
+      if (code === 0) {
+        end(null, duration);
+      } else {
+        // Collect some stderr for context if available
+        end(`Process exited with code ${code}`, duration);
+      }
+      resolve();
+    });
+  });
 }
