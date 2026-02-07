@@ -15,7 +15,6 @@ interface SyncProgressProps {
   onStart: () => void;
   canStart: boolean;
   completionStatus: 'success' | 'error' | null;
-  completionMessage: string | null;
   completionDuration: string | null;
 }
 
@@ -26,7 +25,6 @@ const SyncProgress: React.FC<SyncProgressProps> = ({
   onStart,
   canStart,
   completionStatus,
-  completionMessage,
   completionDuration
 }) => {
   const progressPercent = progress 
@@ -149,7 +147,7 @@ const SyncProgress: React.FC<SyncProgressProps> = ({
               {completionStatus === 'success' ? (
                 <p>The {deleteMode ? 'sync' : 'copy'} operation completed successfully.</p>
               ) : (
-                <p className="error-message">{completionMessage}</p>
+                <p>The operation failed. See details in the modal.</p>
               )}
             </div>
           </div>

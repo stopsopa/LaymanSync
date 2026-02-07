@@ -6,6 +6,7 @@ import DeleteModeToggle from './components/DeleteModeToggle';
 import SyncProgress from './components/SyncProgress';
 import LogViewer from './components/LogViewer';
 import Footer from './components/Footer';
+import ErrorModal from './components/ErrorModal';
 
 interface ProgressData {
   progressPercentHuman: string;
@@ -24,6 +25,7 @@ function App() {
   const [completionStatus, setCompletionStatus] = useState<'success' | 'error' | null>(null);
   const [completionMessage, setCompletionMessage] = useState<string | null>(null);
   const [completionDuration, setCompletionDuration] = useState<string | null>(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   // Set up IPC event listeners
   useEffect(() => {
@@ -40,6 +42,7 @@ function App() {
       if (result.error) {
         setCompletionStatus('error');
         setCompletionMessage(result.error);
+        setShowErrorModal(true);
       } else {
         setCompletionStatus('success');
       }
@@ -59,6 +62,7 @@ function App() {
     setCompletionStatus(null);
     setCompletionMessage(null);
     setCompletionDuration(null);
+    setShowErrorModal(false);
   };
 
   const handleSourceDrop = (path: string) => {
@@ -141,7 +145,6 @@ function App() {
           onStart={handleStart}
           canStart={canStart}
           completionStatus={completionStatus}
-          completionMessage={completionMessage}
           completionDuration={completionDuration}
         />
 
@@ -151,6 +154,15 @@ function App() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Error Modal */}
+      {showErrorModal && completionMessage && (
+        <ErrorModal
+          fileName={sourceDir || "Process"}
+          error={completionMessage}
+          onClose={() => setShowErrorModal(false)}
+        />
+      )}
     </div>
   );
 }
