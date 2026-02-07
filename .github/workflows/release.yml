@@ -14,11 +14,6 @@ on:
         description: "The tag to release (e.g. v1.0.0). Defaults to github.ref_name."
         required: false
         type: string
-      run_electron_build:
-        description: "Run official Electron build steps (QA & Release)?"
-        required: false
-        default: true
-        type: boolean
 
 permissions:
   contents: write
@@ -164,7 +159,6 @@ jobs:
           EOF
 
       - name: "🏗️ Step B: Packaging Electron App (Publish)"
-        if: github.event_name == 'release' || inputs.run_electron_build
         working-directory: ./electron
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

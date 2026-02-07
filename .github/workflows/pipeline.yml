@@ -15,7 +15,7 @@ on:
         default: true
         type: boolean
       run_electron_build:
-        description: "Run official Electron build steps (QA & Release)?"
+        description: "Run official Electron build steps (QA)?"
         required: false
         default: true
         type: boolean
@@ -263,7 +263,7 @@ jobs:
     needs:
       - test-and-build
       - qa-gate
-    if: needs.qa-gate.outputs.approved == 'true'
+    if: needs.qa-gate.outputs.approved == 'true' && (github.event_name != 'workflow_dispatch' || inputs.run_electron_build)
     # LOGIC SUMMARY:
     # 1. If 'qa-gate' FAILS (timeout/rejection), it turns Red but the workflow stays Green (due to continue-on-error).
     # 2. 'qa-gate' failure means the 'approved' output is NEVER set.
@@ -375,7 +375,6 @@ jobs:
           EOF
 
       - name: "🏗️ Step B: Packaging Electron App (QA)"
-        if: github.event_name != 'workflow_dispatch' || inputs.run_electron_build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEBUG: electron-builder
@@ -528,5 +527,4 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.bump.outputs.new_tag }}
-      run_electron_build: ${{ github.event_name != 'workflow_dispatch' || inputs.run_electron_build }}
     secrets: inherit
