@@ -6,6 +6,9 @@ When installing **LaymanSync** on Windows, you may see a warning like:
 > Microsoft Defender SmartScreen prevented an unrecognized app from starting.  
 > Running this app might put your PC at risk.
 
+
+<img width="542" height="508" alt="Image" src="https://github.com/user-attachments/assets/4454dea0-60fe-4a7b-ba5a-7ba2d7fc7013" />
+
 After clicking **More info**, you may see:
 - **App:** LaymanSync-1.0.1-x64-setup.exe  
 - **Publisher:** Unknown publisher
@@ -31,6 +34,9 @@ If you trust the source, you can safely proceed.
 1. Click **More info**
 2. Click **Run anyway**
 
+
+<img width="541" height="507" alt="Image" src="https://github.com/user-attachments/assets/67960a3c-44be-4a00-aaba-bd21e7d5672c" />
+
 The installer will start normally.
 
 ### Why the publisher shows as “Unknown”
@@ -45,4 +51,3 @@ Obtaining and maintaining such a certificate requires a paid certificate authori
 - The installer performs no hidden background actions
 - No telemetry, no auto-updates, no bundled software
 
-As the project grows, proper Windows code signing may be added to eliminate this warning.
