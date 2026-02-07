@@ -4,7 +4,6 @@ electron/bin/
 dist/
 dist-electron/
 release/
-.env
 .env.*.local
 .DS_Store
 .idea/
