@@ -44,6 +44,8 @@ There is [alternative branch](https://github.com/stopsopa/LaymanSync/tree/gemini
 
 ## Installation
 
+How to choose right version of binary from [Releases](https://github.com/stopsopa/LaymanSync/releases) page for your operating system [Choose binary](https://github.com/stopsopa/LaymanSync/wiki/Choose-binary)
+
 ### Windows
 
 Select file:
