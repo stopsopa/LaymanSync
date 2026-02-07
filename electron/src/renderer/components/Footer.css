@@ -55,3 +55,15 @@
   width: 16px;
   height: 16px;
 }
+
+.footer-pipe {
+  margin: 0 10px;
+  color: #d5dbdb;
+  font-weight: 300;
+}
+
+.app-version {
+  color: #879196;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+}

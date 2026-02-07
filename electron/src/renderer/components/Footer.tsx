@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Footer.css';
+import versionData from '../version.json';
 
 const Footer: React.FC = () => {
   const [rcloneVersion, setRcloneVersion] = useState<string | null>(null);
@@ -37,6 +38,13 @@ const Footer: React.FC = () => {
           </svg>
           GitHub
         </a>
+        <span className="footer-pipe">|</span>
+        <span 
+          className="app-version" 
+          title={`Build Time: ${new Date(versionData.buildTime).toLocaleString()}`}
+        >
+          v{versionData.version}
+        </span>
       </div>
     </footer>
   );
