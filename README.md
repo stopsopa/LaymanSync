@@ -44,9 +44,10 @@ There is [alternative branch](https://github.com/stopsopa/LaymanSync/tree/gemini
 
 ## Installation
 
-1. Download the latest version for your operating system from the [Releases](https://github.com/stopsopa/LaymanSync/releases) page.
-2. **macOS**: Drag `LaymanSync.app` to your Applications folder. (binaries for x64 and arm64)
-3. **Windows**: Run the setup executable. (binaries for x64 and arm64)
+1. Download the latest version for your operating system from the [Releases](https://github.com/stopsopa/LaymanSync/releases) page. Binaries for Windows x64 & amd64 are provided also for Mac binaries for x64 and amd64 are provied too.
+2. **macOS**: during installation [issue might occure](MACOS_SECURITY.md).
+3. **Windows**: Run the setup executable. 
+
 
 ## License
 
