@@ -263,7 +263,7 @@ jobs:
     needs:
       - test-and-build
       - qa-gate
-    if: needs.qa-gate.outputs.approved == 'true' && (github.event_name != 'workflow_dispatch' || inputs.run_electron_build)
+    if: needs.qa-gate.outputs.approved == 'true'
     # LOGIC SUMMARY:
     # 1. If 'qa-gate' FAILS (timeout/rejection), it turns Red but the workflow stays Green (due to continue-on-error).
     # 2. 'qa-gate' failure means the 'approved' output is NEVER set.
@@ -306,6 +306,7 @@ jobs:
           ref: ${{ env.RELEASE_TAG }}
 
       - name: 🔍 Audit
+        if: github.event_name != 'workflow_dispatch' || inputs.run_electron_build
         shell: bash
         run: |
           echo "ENV Path: $GITHUB_ENV"
@@ -317,6 +318,7 @@ jobs:
           EOF
 
       - name: 🔍 State Check (2)
+        if: github.event_name != 'workflow_dispatch' || inputs.run_electron_build
         shell: bash
         run: |
           echo "STEP_QA_CHECKOUT=true" >> $GITHUB_ENV
@@ -333,7 +335,7 @@ jobs:
           cache-dependency-path: electron/package-lock.json
 
       - name: 🍷 Install Wine (for Windows build on Linux)
-        if: matrix.target == 'win' && runner.os == 'Linux'
+        if: (github.event_name != 'workflow_dispatch' || inputs.run_electron_build) && matrix.target == 'win' && runner.os == 'Linux'
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
@@ -341,18 +343,21 @@ jobs:
           wine --version
 
       - name: "🧹 Step 0: Clearing release directory"
+        if: github.event_name != 'workflow_dispatch' || inputs.run_electron_build
         run: |
           mkdir -p release
           rm -rf release/* 2>/dev/null || true
           rm -rf release/.* 2>/dev/null || true
 
       - name: 📥 Download Built Code
+        if: github.event_name != 'workflow_dispatch' || inputs.run_electron_build
         uses: actions/download-artifact@v4
         with:
           name: built-code
           path: electron
 
       - name: "📦 Step A: Prepare & Download Binaries"
+        if: github.event_name != 'workflow_dispatch' || inputs.run_electron_build
         run: |
           npm ci
           /bin/bash download-bins.sh ${{ matrix.bins_os }} ${{ matrix.arch }}
@@ -362,6 +367,7 @@ jobs:
           EOF
 
       - name: 🔍 Binary Audit
+        if: github.event_name != 'workflow_dispatch' || inputs.run_electron_build
         run: |
           echo "Listing bin directory content:"
           if [ -d "bin" ]; then
@@ -375,6 +381,7 @@ jobs:
           EOF
 
       - name: "🏗️ Step B: Packaging Electron App (QA)"
+        if: github.event_name != 'workflow_dispatch' || inputs.run_electron_build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEBUG: electron-builder
@@ -438,7 +445,7 @@ jobs:
   bump:
     name: 🚀 Bump Version (Prod)
     needs:
-      - qa-build # <--- Depends on QA passing!
+      - qa-build
       - bump-gate
     if: needs.bump-gate.outputs.approved == 'true'
     # LOGIC SUMMARY:
