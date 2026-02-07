@@ -24,3 +24,4 @@ example/*.gif
 /electron/coverage/
 /electron/node_modules2/
 log.log
+/structures/
