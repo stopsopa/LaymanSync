@@ -1,0 +1,101 @@
+.status-modal-content {
+  max-width: 800px;
+  width: 90%;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-title-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-header.error {
+  border-bottom: 2px solid #d13212;
+}
+
+.status-header.success {
+  border-bottom: 2px solid #1d8102;
+}
+
+.status-header.error h2 {
+  color: #d13212;
+}
+
+.status-header.success h2 {
+  color: #1d8102;
+}
+
+.status-icon-svg.error {
+  color: #d13212;
+}
+
+.status-icon-svg.success {
+  color: #1d8102;
+}
+
+.status-meta {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background-color: #f8f9f9;
+  border-left: 4px solid #d5dbdb;
+  font-size: 14px;
+}
+
+.status-meta .label {
+  font-weight: 700;
+  margin-right: 8px;
+  color: #545b64;
+}
+
+.status-meta .value {
+  color: #16191f;
+  word-break: break-all;
+}
+
+.message-container {
+  padding: 16px;
+  border-radius: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 12px;
+}
+
+.message-container.error {
+  background-color: #16191f;
+  color: #f1f1f1;
+}
+
+.message-container.success {
+  background-color: #f1faff;
+  color: #16191f;
+  border: 1px solid #d5dbdb;
+}
+
+.message-content {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.aws-button-danger {
+  background-color: #d13212;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.aws-button-danger:hover {
+  background-color: #a82a0f;
+}

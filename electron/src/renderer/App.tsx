@@ -6,7 +6,7 @@ import DeleteModeToggle from './components/DeleteModeToggle';
 import SyncProgress from './components/SyncProgress';
 import LogViewer from './components/LogViewer';
 import Footer from './components/Footer';
-import ErrorModal from './components/ErrorModal';
+import StatusModal from './components/StatusModal';
 
 interface ProgressData {
   progressPercentHuman: string;
@@ -25,7 +25,7 @@ function App() {
   const [completionStatus, setCompletionStatus] = useState<'success' | 'error' | null>(null);
   const [completionMessage, setCompletionMessage] = useState<string | null>(null);
   const [completionDuration, setCompletionDuration] = useState<string | null>(null);
-  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
 
   // Set up IPC event listeners
   useEffect(() => {
@@ -42,10 +42,11 @@ function App() {
       if (result.error) {
         setCompletionStatus('error');
         setCompletionMessage(result.error);
-        setShowErrorModal(true);
       } else {
         setCompletionStatus('success');
+        setCompletionMessage(`The ${deleteMode ? 'sync' : 'copy'} operation completed successfully.`);
       }
+      setShowStatusModal(true);
       setIsProcessing(false);
     });
 
@@ -54,7 +55,7 @@ function App() {
       unsubLog();
       unsubEnd();
     };
-  }, []);
+  }, [deleteMode]); // Added deleteMode to dependencies to ensure correct label in message
 
   const resetState = () => {
     setProgress(null);
@@ -62,7 +63,7 @@ function App() {
     setCompletionStatus(null);
     setCompletionMessage(null);
     setCompletionDuration(null);
-    setShowErrorModal(false);
+    setShowStatusModal(false);
   };
 
   const handleSourceDrop = (path: string) => {
@@ -155,12 +156,14 @@ function App() {
       {/* Footer */}
       <Footer />
 
-      {/* Error Modal */}
-      {showErrorModal && completionMessage && (
-        <ErrorModal
-          fileName={sourceDir || "Process"}
-          error={completionMessage}
-          onClose={() => setShowErrorModal(false)}
+      {/* Status Modal (Success or Error) */}
+      {showStatusModal && completionStatus && completionMessage && (
+        <StatusModal
+          type={completionStatus}
+          title={completionStatus === 'success' ? 'Completed Successfully' : 'Operation Failed'}
+          message={completionMessage}
+          duration={completionDuration || undefined}
+          onClose={() => setShowStatusModal(false)}
         />
       )}
     </div>
