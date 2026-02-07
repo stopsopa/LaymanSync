@@ -12,12 +12,29 @@ const __dirname = path.dirname(__filename);
  * /bin/bash ts.sh electron/src/tools/determineBinaryAbsolutePath.ts
  */
 export function determineBinaryAbsolutePath(searchDir?: string): string {
-  // If searchDir is not provided, we look for 'bin' three levels up from this tool
-  // which matches PROJECT_ROOT/electron/bin when the tool is in PROJECT_ROOT/electron/src/tools/
-  const binDir = searchDir || path.resolve(__dirname, "..", "..", "bin");
+  // In production (packaged app), extraResources are located in process.resourcesPath.
+  // In development, they are located in PROJECT_ROOT/electron/bin.
+  let binDir = searchDir;
+
+  if (!binDir) {
+    const prodBinDir = (process as any).resourcesPath ? path.join((process as any).resourcesPath, "bin") : "";
+
+    // We check if prodBinDir exists and isn't just a folder inside node_modules (which happens in dev mode)
+    if (prodBinDir && fs.existsSync(prodBinDir) && !prodBinDir.includes("node_modules")) {
+      binDir = prodBinDir;
+    } else {
+      // Fallback to dev location: three levels up from this tool
+      // which matches PROJECT_ROOT/electron/bin when the tool is in PROJECT_ROOT/electron/src/tools/
+      binDir = path.resolve(__dirname, "..", "..", "bin");
+    }
+  }
 
   if (!fs.existsSync(binDir)) {
-    throw new Error(`determineBinaryAbsolutePath.ts error: Bin directory not found: ${binDir}`);
+    throw new Error(
+      `determineBinaryAbsolutePath.ts error: Bin directory not found: ${binDir}\n` +
+        `Current __dirname: ${__dirname}\n` +
+        `Process resourcesPath: ${(process as any).resourcesPath}`,
+    );
   }
 
   const allFiles: string[] = [];
