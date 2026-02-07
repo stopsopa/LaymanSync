@@ -37,17 +37,10 @@ const DeleteModeToggle: React.FC<DeleteModeToggleProps> = ({
           </div>
           <div className="warning-content">
             <p>
-              <strong>Sync mode uses <code>rclone sync</code></strong> instead of <code>rclone copy</code>.
+              <strong>rclone sync</strong> makes destination <strong>identical</strong> to source by copying changes and <strong>deleting</strong> files in destination that don't exist in source.
             </p>
-            <p>
-              This will make the destination directory <strong>identical</strong> to the source directory by:
-            </p>
-            <ul>
-              <li>Copying new and modified files from source to destination</li>
-              <li><strong>Deleting files in the destination that don't exist in the source</strong></li>
-            </ul>
             <p className="warning-emphasis">
-              ⚠️ Files in the destination directory that are not in the source will be permanently deleted!
+              ⚠️ Files unique to destination will be permanently deleted!
             </p>
           </div>
         </div>
