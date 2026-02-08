@@ -1,6 +1,6 @@
 export type MainTypes = {
-  sourceDir: string;
-  destinationDir: string;
+  source: string;
+  target: string;
   delete?: boolean;
 };
 

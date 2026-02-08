@@ -9,17 +9,17 @@ import type { MainTypes, DriveCompressionOptions } from "./commonTypes.js";
  * Executes a single rclone command and tracks its progress.
  */
 export default async function driveCompression(options: DriveCompressionOptions) {
-  const { sourceDir, destinationDir, progressEvent, log, end } = options;
+  const { source, target, progressEvent, log, end } = options;
 
   const mainExec = determineBinaryAbsolutePath();
 
-  const [action, flags, source, dest] = generateRcloneParams({
-    sourceDir,
-    destinationDir,
+  const [action, flags, sourcePath, destPath] = generateRcloneParams({
+    source,
+    target,
     delete: options.delete ?? false,
   });
 
-  const args = [action, ...flags, source, dest];
+  const args = [action, ...flags, sourcePath, destPath];
 
   const startTime = Date.now();
 

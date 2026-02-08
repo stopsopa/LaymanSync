@@ -8,19 +8,19 @@ import driveCompression from "./driveCompression.js";
  * /bin/bash ts.sh electron/src/tools/driveCompression.run.ts
  */
 
-const sourceDir = "electron/node_modules";
-const destinationDir = "electron/node_modules2";
+const source = "electron/node_modules";
+const target = "electron/node_modules2";
 
 console.log(`Starting rclone copy test...`);
-console.log(`Source:      ${sourceDir}`);
-console.log(`Destination: ${destinationDir}`);
+console.log(`Source:      ${source}`);
+console.log(`Destination: ${target}`);
 console.log(`----------------------------------------------------------------`);
 
 fs.writeFileSync("stdout.log", "");
 
 await driveCompression({
-  sourceDir,
-  destinationDir,
+  source,
+  target,
   delete: false,
   progressEvent: (data) => {
     const { progressPercentHuman, totalTimePassedHuman, estimatedTotalTimeHuman, estimatedRemainingTimeHuman } = data;

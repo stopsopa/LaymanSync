@@ -28,8 +28,8 @@ describe("generateRcloneParams", () => {
   it("should generate rclone copy params when delete is false", () => {
     const params = {
       delete: false as const,
-      sourceDir: tmpSource,
-      destinationDir: tmpDest,
+      source: tmpSource,
+      target: tmpDest,
     };
 
     const result = generateRcloneParams(params);
@@ -45,8 +45,8 @@ describe("generateRcloneParams", () => {
   it("should generate rclone sync params when delete is true", () => {
     const params = {
       delete: true as const,
-      sourceDir: tmpSource,
-      destinationDir: tmpDest,
+      source: tmpSource,
+      target: tmpDest,
     };
 
     const result = generateRcloneParams(params);
@@ -62,8 +62,8 @@ describe("generateRcloneParams", () => {
   it("should generate string/array version for execution", () => {
     const args = generateRcloneParamsStrings({
       delete: false,
-      sourceDir: tmpSource,
-      destinationDir: tmpDest,
+      source: tmpSource,
+      target: tmpDest,
     });
 
     assert.equal(args, `copy -v -P --transfers 4 --fast-list --stats=1s --stats-one-line '${tmpSource}' '${tmpDest}'`);
@@ -78,8 +78,8 @@ describe("generateRcloneParams", () => {
 
     const args = generateRcloneParamsStrings({
       delete: true,
-      sourceDir: spaceSource,
-      destinationDir: spaceDest,
+      source: spaceSource,
+      target: spaceDest,
     });
 
     assert.equal(
@@ -92,8 +92,8 @@ describe("generateRcloneParams", () => {
     assert.throws(() => {
       generateRcloneParams({
         delete: false,
-        sourceDir: "/non/existent/path/at/all",
-        destinationDir: tmpDest,
+        source: "/non/existent/path/at/all",
+        target: tmpDest,
       });
     }, /ENOENT: no such file or directory/);
   });
@@ -103,8 +103,8 @@ describe("generateRcloneParams", () => {
     assert.throws(() => {
       generateRcloneParams({
         delete: false,
-        sourceDir: tmpSource,
-        destinationDir: nonExistentDest,
+        source: tmpSource,
+        target: nonExistentDest,
       });
     }, /ENOENT: no such file or directory/);
   });
@@ -113,8 +113,8 @@ describe("generateRcloneParams", () => {
     assert.throws(() => {
       generateRcloneParams({
         delete: false,
-        sourceDir: "./relative/path",
-        destinationDir: tmpDest,
+        source: "./relative/path",
+        target: tmpDest,
       });
     }, /generateRcloneParams\.ts error: Source path has to be absolute: \.\/relative\/path/);
   });
@@ -126,8 +126,8 @@ describe("generateRcloneParams", () => {
     assert.throws(() => {
       generateRcloneParams({
         delete: false,
-        sourceDir: tmpSource,
-        destinationDir: filePath,
+        source: tmpSource,
+        target: filePath,
       });
     }, /generateRcloneParams\.ts error: Destination path exists but is not a directory/);
   });
@@ -136,15 +136,15 @@ describe("generateRcloneParams", () => {
     const remotePath = "remote:bucket/path";
     const result = generateRcloneParams({
       delete: false,
-      sourceDir: remotePath,
-      destinationDir: tmpDest,
+      source: remotePath,
+      target: tmpDest,
     });
     assert.strictEqual(result[2], remotePath);
 
     const result2 = generateRcloneParams({
       delete: false,
-      sourceDir: tmpSource,
-      destinationDir: remotePath,
+      source: tmpSource,
+      target: remotePath,
     });
     assert.strictEqual(result2[3], remotePath);
   });

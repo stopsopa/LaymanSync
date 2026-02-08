@@ -46,8 +46,8 @@ if (args.length === 0 || args.includes("--help") || args.includes("/?")) {
 const params: Params & {
   mainExec: string;
 } = {
-  sourceDir: "",
-  destinationDir: "",
+  source: "",
+  target: "",
   delete: false,
   mainExec: "",
 };
@@ -67,12 +67,12 @@ for (let i = 0; i < args.length; i++) {
   switch (arg) {
     case "-s":
     case "--source":
-      params.sourceDir = nextArg;
+      params.source = nextArg;
       i++;
       break;
     case "-d":
     case "--dest":
-      params.destinationDir = nextArg;
+      params.target = nextArg;
       i++;
       break;
     case "--delete":
@@ -89,8 +89,8 @@ for (let i = 0; i < args.length; i++) {
 
 // Basic validation
 const missing: string[] = [];
-if (!params.sourceDir) missing.push("-s, --source");
-if (!params.destinationDir) missing.push("-d, --dest");
+if (!params.source) missing.push("-s, --source");
+if (!params.target) missing.push("-d, --dest");
 
 if (missing.length > 0) {
   console.error(`cli.ts error: Missing or invalid required arguments: ${missing.join(", ")}`);

@@ -4,9 +4,11 @@ import { fileURLToPath } from "node:url";
 
 import type { DriveCompressionOptions } from "./commonTypes.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 import driveCompression from "./driveCompression.js";
+
+import type { ProgressData, MainTypes } from "./commonTypes.js";
+
+const __filename = fileURLToPath(import.meta.url);
 
 export default async function driveCompressionMultiple(options: DriveCompressionOptions[]) {
   for (const option of options) {
@@ -32,7 +34,7 @@ if (isMain) {
       throw new Error(`File not found: ${configFile}`);
     }
 
-    let config;
+    let config: MainTypes[] = [];
 
     try {
       config = JSON.parse(fs.readFileSync(configFile, "utf-8"));
@@ -41,9 +43,31 @@ if (isMain) {
       //   process.exit(1);
     }
     console.log(`configFile >${configFile}<`);
-    console.log(config);
+
+    console.log("config", config);
+
+    const options = config.map((o: MainTypes, i: number): DriveCompressionOptions => {
+      const option: DriveCompressionOptions = {
+        ...o,
+
+        progressEvent: (data: ProgressData) => {
+          console.log(`progressEvent(${i}):`, data);
+        },
+        log: (line) => {
+          console.log(`log(${i}):`, line);
+        },
+        end: (error, duration) => {
+          console.log(`end(${i}):`, error, duration);
+        },
+      };
+
+      return option;
+    });
+
+    await driveCompressionMultiple(options);
   } catch (e: any) {
     e.message = `determineBinaryAbsolutePath.ts error: ${e.message}`;
+
     throw e;
   }
 }

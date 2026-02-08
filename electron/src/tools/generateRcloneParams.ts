@@ -21,8 +21,8 @@ import { escapeFilePath } from "./escapeFilePath.js";
  */
 export type Params = {
   delete: boolean;
-  sourceDir: string;
-  destinationDir: string;
+  source: string;
+  target: string;
 };
 
 /**
@@ -39,8 +39,8 @@ export type ResolveAction<T extends boolean> = T extends true ? "sync" : "copy";
 export type RcloneParams<P extends Params = Params> = [
   ResolveAction<P["delete"]>,
   ["-v", "-P", "--transfers", "4", "--fast-list", "--stats=1s", "--stats-one-line"],
-  string, // resolved sourceDir
-  string, // resolved destinationDir
+  string, // resolved source
+  string, // resolved target
 ];
 
 const processPath = (name: string, p: string): string => {
@@ -76,10 +76,10 @@ const processPath = (name: string, p: string): string => {
  * value of 'delete' (true/false) and narrow the return type accordingly.
  */
 export default function generateRcloneParams<P extends Params>(params: P): RcloneParams<P> {
-  const { delete: isDelete, sourceDir, destinationDir } = params;
+  const { delete: isDelete, source, target } = params;
 
-  const finalSource = processPath("Source", sourceDir);
-  const finalDestination = processPath("Destination", destinationDir);
+  const finalSource = processPath("Source", source);
+  const finalDestination = processPath("Destination", target);
 
   const result: RcloneParams<P> = [
     (isDelete ? "sync" : "copy") as ResolveAction<P["delete"]>,
