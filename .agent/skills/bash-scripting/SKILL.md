@@ -25,7 +25,7 @@ But to be specific:
 
 When you have to go up from current script location use ../ or ../../ but the general target is to reach root directory of the project and then from there somewhere else then define ROOT by rerriving it from DIR and from that point use ROOT to reach wherever you need to reach.
 
-But also when you have no intention to do anything where ROOT would be needed then don't define ROOT at all.
+WARNING: if you have no intetnion to use ROOT in your script then don't define it at all.
 
 # shebang
 
@@ -38,6 +38,16 @@ Call script like this:
 When using variables always surround them with ${}.
 
 never $DIR, always ${DIR}
+
+# types of conditions
+
+always prefer these more modern double square bracket syntax for conditions:
+
+if [[...]]; then
+
+over
+
+if [ ... ]; then
 
 # error handling
 
@@ -54,3 +64,16 @@ Add to the message any relevent parameters values like so
 (surround with ><, this way I will see any whitespaces at the beginning or end of the value)
 
 Use `npm run lint:bash` (requires `shellcheck`) to verify script quality.
+
+# print to stdout
+
+if using echo to print multiple lines to the stdout then prefer heredoc notation like
+
+```
+cat <<EEE
+
+  my multiline message
+
+EEE
+
+```

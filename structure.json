@@ -1,0 +1,32 @@
+[
+  {
+    "label": "test1",
+    "source": "./structures/dir01",
+    "target": "./structures/target01",
+    "delete": false
+  },
+  {
+    "label": "test2 - delete mode - override target01",
+    "source": "./structures/dir02",
+    "target": "./structures/target01",
+    "delete": true
+  },
+  {
+    "label": "test3",
+    "source": "./structures/dir02",
+    "target": "./structures/nonexisting",
+    "delete": false
+  },
+  {
+    "label": "test3",
+    "source": "./structures/dir02",
+    "target": "./structures/target02",
+    "delete": false
+  },
+  {
+    "label": "test4 override",
+    "source": "./structures/dir03",
+    "target": "./structures/target02",
+    "delete": false
+  }
+]

@@ -1,5 +1,4 @@
 node_modules/
-**/node_modules/
 electron/bin/
 dist/
 dist-electron/
@@ -26,3 +25,4 @@ example/*.gif
 log.log
 /structures/
 /electron/src/renderer/version.json
+/structure-gen.json

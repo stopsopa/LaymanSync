@@ -52,10 +52,17 @@ const processPath = (name: string, p: string, isSource: boolean): string => {
   // Resolve relative local path to absolute
   const resolvedPath = path.resolve(p);
 
-  // Real directory validation
-  const stats = fs.statSync(resolvedPath);
-  if (!stats.isDirectory()) {
-    throw new Error(`generateRcloneParams.ts error: ${name} path exists but is not a directory: ${resolvedPath}`);
+  try {
+    // Real directory validation
+    const stats = fs.statSync(resolvedPath);
+
+    if (!stats.isDirectory()) {
+      throw new Error(`${name} path exists but is not a directory: ${resolvedPath}`);
+    }
+  } catch (e: any) {
+    e.message = `generateRcloneParams.ts error: ${e.message}`;
+
+    throw e;
   }
 
   return resolvedPath;
