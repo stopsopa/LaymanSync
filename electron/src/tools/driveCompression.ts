@@ -3,21 +3,7 @@ import generateRcloneParams from "./generateRcloneParams.js";
 import { timeHumanReadable } from "./timeHumanReadable.js";
 import { determineBinaryAbsolutePath } from "./determineBinaryAbsolutePath.js";
 
-export type ProgressData = {
-  progressPercentHuman: string;
-  totalTimePassedHuman: string;
-  estimatedTotalTimeHuman: string;
-  estimatedRemainingTimeHuman: string;
-};
-
-export type DriveCompressionOptions = {
-  sourceDir: string;
-  destinationDir: string;
-  delete?: boolean;
-  progressEvent?: (data: ProgressData) => void;
-  log?: (line: string) => void;
-  end: (error: string | null, duration: string) => void;
-};
+import type { MainTypes, DriveCompressionOptions } from "./commonTypes.js";
 
 /**
  * Executes a single rclone command and tracks its progress.

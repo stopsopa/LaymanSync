@@ -25,3 +25,4 @@ example/*.gif
 /electron/node_modules2/
 log.log
 /structures/
+/electron/src/renderer/version.json

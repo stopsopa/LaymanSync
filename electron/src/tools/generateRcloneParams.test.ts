@@ -95,17 +95,18 @@ describe("generateRcloneParams", () => {
         sourceDir: "/non/existent/path/at/all",
         destinationDir: tmpDest,
       });
-    }, /generateRcloneParams\.ts error: Source directory does not exist/);
+    }, /ENOENT: no such file or directory/);
   });
 
-  it("should NOT throw error if destination directory does not exist", () => {
+  it("should throw error if destination directory does not exist", () => {
     const nonExistentDest = path.join(tmpBase, "non-existent-dest");
-    const result = generateRcloneParams({
-      delete: false,
-      sourceDir: tmpSource,
-      destinationDir: nonExistentDest,
-    });
-    assert.strictEqual(result[3], path.resolve(nonExistentDest));
+    assert.throws(() => {
+      generateRcloneParams({
+        delete: false,
+        sourceDir: tmpSource,
+        destinationDir: nonExistentDest,
+      });
+    }, /ENOENT: no such file or directory/);
   });
 
   it("should throw error if destination exists but is not a directory (e.g. it is a file)", () => {

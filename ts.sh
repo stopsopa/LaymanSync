@@ -13,12 +13,21 @@ export NODE_NO_WARNINGS=1
 # require node-suppress-warning.js
 # require node.config.json
 
+NODE_CMD=(node --experimental-config-file="${DIR}/node.config.json" --experimental-loader="${DIR}/ts-resolver.js" --import "file://${DIR}/node-suppress-warning.js")
+
 if [[ "${@}" == *"--test"* ]]; then
   rm -rf "${DIR}/coverage"
   # without c8 ... - test will work like nothing happened but coverage directory won't be created
   # requires c8 (npx will handle it)
-  npx c8 --reporter=lcov --reporter=html --reporter=text \
-    node --experimental-config-file="${DIR}/node.config.json" --experimental-loader="${DIR}/ts-resolver.js" --import file://${DIR}/node-suppress-warning.js ${@}
+
+  REPORTERS=(--reporter=lcov --reporter=html --reporter=text)
+
+  if [ -n "${SILENT}" ]; then
+    REPORTERS=(--reporter=lcov --reporter=html)
+  fi
+
+  NODE_OPTIONS="" npx c8 "${REPORTERS[@]}" \
+    env NODE_OPTIONS="$NODE_OPTIONS" "${NODE_CMD[@]}" "${@}"
 else
-    node --experimental-config-file="${DIR}/node.config.json" --experimental-loader="${DIR}/ts-resolver.js" --import file://${DIR}/node-suppress-warning.js ${@}
+  "${NODE_CMD[@]}" "${@}"
 fi

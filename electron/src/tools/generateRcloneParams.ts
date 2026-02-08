@@ -53,19 +53,9 @@ const processPath = (name: string, p: string, isSource: boolean): string => {
   const resolvedPath = path.resolve(p);
 
   // Real directory validation
-  try {
-    const stats = fs.statSync(resolvedPath);
-    if (!stats.isDirectory()) {
-      throw new Error(`generateRcloneParams.ts error: ${name} path exists but is not a directory: ${resolvedPath}`);
-    }
-  } catch (err: any) {
-    if (err.code === "ENOENT") {
-      if (isSource) {
-        throw new Error(`generateRcloneParams.ts error: ${name} directory does not exist: ${resolvedPath}`);
-      }
-      return resolvedPath;
-    }
-    throw err;
+  const stats = fs.statSync(resolvedPath);
+  if (!stats.isDirectory()) {
+    throw new Error(`generateRcloneParams.ts error: ${name} path exists but is not a directory: ${resolvedPath}`);
   }
 
   return resolvedPath;
