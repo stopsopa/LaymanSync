@@ -21,11 +21,16 @@ export default async function driveCompressionMultiple(options: DriveCompression
 // Integration for CI/CD or CLI usage: outputs the path to stdout
 const isMain = process.argv[1] && process.argv[1] === __filename;
 
-console.log('process.argv', process.argv);
+console.log("process.argv", process.argv);
 
 if (isMain) {
   try {
     const configFile = process.argv[2];
+
+    // throw when file doesn't exist
+    if (!fs.existsSync(configFile)) {
+      throw new Error(`File not found: ${configFile}`);
+    }
 
     let config;
 
@@ -38,7 +43,7 @@ if (isMain) {
     console.log(`configFile >${configFile}<`);
     console.log(config);
   } catch (e: any) {
-    console.error(`determineBinaryAbsolutePath.ts error: ${e.message}`);
-    process.exit(1);
+    e.message = `determineBinaryAbsolutePath.ts error: ${e.message}`;
+    throw e;
   }
 }

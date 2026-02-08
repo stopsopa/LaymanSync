@@ -29,23 +29,27 @@ echo "testbatch.sh: Generating ${OUTPUT_FILE} from ${INPUT_FILE}..."
 OUTPUT="$(NODE_OPTIONS="" /bin/bash "${DIR}/ts.sh" generate-structure-json.ts "${INPUT_FILE}" 2>&1)"
 EXIT_CODE="${?}"
 
-if [[ "${EXIT_CODE}" == "0" ]]; then
-    # If successful, redirect (save) output to the specified output file
-    printf "%s" "${OUTPUT}" > "${OUTPUT_FILE}"
-
-    cat <<EEE
-testbatch.sh: ${OUTPUT_FILE}: OK
-
-ALL GOOD
-EEE
-else
+if [[ "${EXIT_CODE}" != "0" ]]; then
     # If not good, print output to stdout
     cat <<EEE
 ${OUTPUT}
 testbatch.sh error: generate-structure-json.ts failed with exit code ${EXIT_CODE}
 EEE
-fi
 
 # Forward exit code
 exit "${EXIT_CODE}"
+
+fi
+
+# If successful, redirect (save) output to the specified output file
+printf "%s" "${OUTPUT}" > "${OUTPUT_FILE}"
+
+cat <<EEE
+
+testbatch.sh: ${OUTPUT_FILE}: OK
+
+EEE
+
+/bin/bash ts.sh electron/src/tools/driveCompressionMultiple.ts structure-gen.json
+
 

@@ -109,6 +109,16 @@ describe("generateRcloneParams", () => {
     }, /ENOENT: no such file or directory/);
   });
 
+  it("should throw error if path is not absolute", () => {
+    assert.throws(() => {
+      generateRcloneParams({
+        delete: false,
+        sourceDir: "./relative/path",
+        destinationDir: tmpDest,
+      });
+    }, /generateRcloneParams\.ts error: Source path has to be absolute: \.\/relative\/path/);
+  });
+
   it("should throw error if destination exists but is not a directory (e.g. it is a file)", () => {
     const filePath = path.join(tmpBase, "actually-a-file.txt");
     fs.writeFileSync(filePath, "hello");

@@ -43,21 +43,23 @@ export type RcloneParams<P extends Params = Params> = [
   string, // resolved destinationDir
 ];
 
-const processPath = (name: string, p: string, isSource: boolean): string => {
+const processPath = (name: string, p: string): string => {
   // If it contains a colon, assume it's a remote path and return as is
   if (p.includes(":")) {
     return p;
   }
 
-  // Resolve relative local path to absolute
-  const resolvedPath = path.resolve(p);
+  // It has to be absolute
+  if (!path.isAbsolute(p)) {
+    throw new Error(`generateRcloneParams.ts error: ${name} path has to be absolute: ${p}`);
+  }
 
   try {
     // Real directory validation
-    const stats = fs.statSync(resolvedPath);
+    const stats = fs.statSync(p);
 
     if (!stats.isDirectory()) {
-      throw new Error(`${name} path exists but is not a directory: ${resolvedPath}`);
+      throw new Error(`${name} path exists but is not a directory: ${p}`);
     }
   } catch (e: any) {
     e.message = `generateRcloneParams.ts error: ${e.message}`;
@@ -65,7 +67,7 @@ const processPath = (name: string, p: string, isSource: boolean): string => {
     throw e;
   }
 
-  return resolvedPath;
+  return p;
 };
 
 /**
@@ -76,8 +78,8 @@ const processPath = (name: string, p: string, isSource: boolean): string => {
 export default function generateRcloneParams<P extends Params>(params: P): RcloneParams<P> {
   const { delete: isDelete, sourceDir, destinationDir } = params;
 
-  const finalSource = processPath("Source", sourceDir, true);
-  const finalDestination = processPath("Destination", destinationDir, false);
+  const finalSource = processPath("Source", sourceDir);
+  const finalDestination = processPath("Destination", destinationDir);
 
   const result: RcloneParams<P> = [
     (isDelete ? "sync" : "copy") as ResolveAction<P["delete"]>,
