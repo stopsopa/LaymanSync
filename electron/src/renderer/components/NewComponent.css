@@ -18,6 +18,7 @@
 
 .new-layout-header {
   margin-bottom: var(--spacing-md);
+  text-align: center;
 }
 
 .new-layout-header h2 {
