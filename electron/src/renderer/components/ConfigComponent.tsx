@@ -16,16 +16,14 @@ const ConfigComponent: FC<ConfigComponentProps> = ({ toLogic, configFile, setCon
   };
 
   return (
-    <div className="wizard-step-content">
+    <div className="wizard-step-content" style={{ padding: "10px" }}>
       <h3 className="section-title">Configuration</h3>
 
       <div>
         <ConfigFile value={configFile} onChange={setConfigFile} />
       </div>
 
-      <button onClick={toLogic}>
-        Next Step
-      </button>
+      {/* <button onClick={toLogic}>Next Step</button>
 
       <div>
         <label>
@@ -60,7 +58,7 @@ const ConfigComponent: FC<ConfigComponentProps> = ({ toLogic, configFile, setCon
 
       {test.map((row, index) => (
         <div key={index}>{row}</div>
-      ))}
+      ))} */}
     </div>
   );
 };
