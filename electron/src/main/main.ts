@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, shell, dialog } from "electron";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -135,6 +136,32 @@ ipcMain.handle("app:getRcloneVersion", async () => {
 // Open external URL
 ipcMain.on("app:openExternal", (_event, url: string) => {
   shell.openExternal(url);
+});
+
+// Synchronous JSON file reading
+ipcMain.on("file:read-json-sync", (event, filePath: string) => {
+  try {
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, "utf-8");
+      event.returnValue = JSON.parse(content);
+    } else {
+      event.returnValue = null;
+    }
+  } catch (error) {
+    console.error("Error reading JSON sync:", error);
+    event.returnValue = null;
+  }
+});
+
+// Synchronous JSON file writing
+ipcMain.on("file:write-json-sync", (event, { filePath, data }: { filePath: string; data: any }) => {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+    event.returnValue = true;
+  } catch (error) {
+    console.error("Error writing JSON sync:", error);
+    event.returnValue = false;
+  }
 });
 
 // Start sync/copy operation

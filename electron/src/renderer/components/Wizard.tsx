@@ -3,11 +3,17 @@ import "./Wizard.css";
 import ConfigComponent from "./ConfigComponent";
 import LogicComponent from "./LogicComponent";
 import clsx from "clsx";
+import { useEffect } from "react";
+import { configManager } from "../tools/ConfigManager";
 
 function Wizard() {
   const [configFile, setConfigFile] = useState<string | null>(null);
 
   const [configWizzardStep, setConfigWizzardStep] = useState(true);
+
+  useEffect(() => {
+    configManager.setPath(configFile);
+  }, [configFile]);
 
   function selectLogicView() {
     if (configFile) {

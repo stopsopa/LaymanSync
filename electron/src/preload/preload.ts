@@ -12,8 +12,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Get rclone version
   getRcloneVersion: () => ipcRenderer.invoke("app:getRcloneVersion"),
 
-  // Open URL in system browser
+  // Open external URL
   openExternal: (url: string) => ipcRenderer.send("app:openExternal", url),
+
+  // Synchronous JSON file operations
+  readJsonSync: (filePath: string) => ipcRenderer.sendSync("file:read-json-sync", filePath),
+  writeJsonSync: (filePath: string, data: any) => ipcRenderer.sendSync("file:write-json-sync", { filePath, data }),
 
   // Open native directory selection dialog
   openDirectory: () => ipcRenderer.invoke("dialog:openDirectory"),
@@ -58,6 +62,8 @@ declare global {
       revealDirectory: (dirPath: string) => void;
       getRcloneVersion: () => Promise<string>;
       openExternal: (url: string) => void;
+      readJsonSync: (filePath: string) => any;
+      writeJsonSync: (filePath: string, data: any) => boolean;
       openDirectory: () => Promise<string | null>;
       openFile: (filters?: Electron.FileFilter[]) => Promise<string | null>;
       saveFile: (options?: Electron.SaveDialogOptions) => Promise<string | null>;
