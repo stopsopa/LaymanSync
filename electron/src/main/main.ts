@@ -103,7 +103,7 @@ ipcMain.on("app:openExternal", (_event, url: string) => {
 });
 
 // Start sync/copy operation
-ipcMain.on("sync:start", async (event, options: { sourceDir: string; destinationDir: string; deleteMode: boolean }) => {
+ipcMain.on("sync:start", async (event, options: { source: string; target: string; deleteMode: boolean }) => {
   const accumulatedLogs: string[] = [];
 
   try {
@@ -118,8 +118,8 @@ ipcMain.on("sync:start", async (event, options: { sourceDir: string; destination
     // so we can handle it in the catch block as requested.
     await new Promise<void>((resolve, reject) => {
       driveCompression({
-        sourceDir: options.sourceDir,
-        destinationDir: options.destinationDir,
+        source: options.source,
+        target: options.target,
         delete: options.deleteMode,
         progressEvent: (data) => {
           const now = Date.now();
@@ -164,8 +164,8 @@ ipcMain.on("sync:start", async (event, options: { sourceDir: string; destination
 
     // Translation for Rclone exit code 7 (Fatal Error)
     if (errorMessage.includes("exited with code 7")) {
-      const absSource = path.resolve(options.sourceDir);
-      const absDest = path.resolve(options.destinationDir);
+      const absSource = path.resolve(options.source);
+      const absDest = path.resolve(options.target);
 
       const relativeToDest = path.relative(absDest, absSource);
       const sourceInsideDest = !relativeToDest.startsWith("..") && !path.isAbsolute(relativeToDest);

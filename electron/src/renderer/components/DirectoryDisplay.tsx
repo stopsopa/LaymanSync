@@ -2,42 +2,42 @@ import React from 'react';
 import './DirectoryDisplay.css';
 
 interface DirectoryDisplayProps {
-  sourceDir: string | null;
-  destinationDir: string | null;
+  source: string | null;
+  target: string | null;
   onShowInFinder: (path: string) => void;
 }
 
 const DirectoryDisplay: React.FC<DirectoryDisplayProps> = ({
-  sourceDir,
-  destinationDir,
+  source,
+  target,
   onShowInFinder
 }) => {
-  if (!sourceDir && !destinationDir) {
+  if (!source && !target) {
     return null;
   }
 
   return (
     <div className="directory-display">
-      {sourceDir && (
+      {source && (
         <div className="directory-row">
           <span className="directory-row-label">Source Directory:</span>
-          <span className="directory-row-path" title={sourceDir}>{sourceDir}</span>
+          <span className="directory-row-path" title={source}>{source}</span>
           <button
             className="show-finder-button"
-            onClick={() => onShowInFinder(sourceDir)}
+            onClick={() => onShowInFinder(source)}
           >
             Show in Finder
           </button>
         </div>
       )}
       
-      {destinationDir && (
+      {target && (
         <div className="directory-row">
           <span className="directory-row-label">Destination Directory:</span>
-          <span className="directory-row-path" title={destinationDir}>{destinationDir}</span>
+          <span className="directory-row-path" title={target}>{target}</span>
           <button
             className="show-finder-button"
-            onClick={() => onShowInFinder(destinationDir)}
+            onClick={() => onShowInFinder(target)}
           >
             Show in Finder
           </button>

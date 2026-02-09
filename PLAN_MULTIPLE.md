@@ -1,2 +1,3 @@
+Whatever I will ask now do it in electron/src/renderer/components/NewComponent.tsx , don't touch @PreviousComponent.tsx and anything which is child of this
 
-I would like to build version of this app to handle multiple pairs of 
+also introduce separate css file for NewComponent.tsc, call it NewComponent.css
