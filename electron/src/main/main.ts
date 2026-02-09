@@ -95,10 +95,11 @@ ipcMain.handle("dialog:openDirectory", async () => {
 });
 
 // Select file using native dialog
-ipcMain.handle("dialog:openFile", async () => {
+ipcMain.handle("dialog:openFile", async (_event, filters?: Electron.FileFilter[]) => {
   if (!mainWindow) return null;
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ["openFile"],
+    filters: filters,
   });
   if (result.canceled || result.filePaths.length === 0) {
     return null;

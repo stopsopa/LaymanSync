@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import { useState } from "react";
+import DropzoneFile from "./DropzoneFile";
 
 type ConfigComponentProps = {
   toLogic: () => void;
@@ -17,24 +18,43 @@ const ConfigComponent: FC<ConfigComponentProps> = ({ toLogic, configFile, setCon
   return (
     <div className="wizard-step-content">
       <h3 className="section-title">Configuration</h3>
-      <button onClick={toLogic}>Next Step</button>
+      <div>
 
-      <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-        <input type="radio" name="configMode" checked={configFile === null} onChange={() => setConfigFile(null)} />
-        <span>No configuration (None)</span>
-      </label>
+        <DropzoneFile onChange={setConfigFile}>
+          {configFile ? (
+            <div>
+              <span>Selected Configuration:</span>
+              <code>{configFile}</code>
+            </div>
+          ) : null}
+        </DropzoneFile>
+      </div>
 
-      <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-        <input
-          type="radio"
-          name="configMode"
-          checked={configFile === "/myconfig.json"}
-          onChange={() => setConfigFile("/myconfig.json")}
-        />
-        <span>Use myconfig.json</span>
-      </label>
+        <button onClick={toLogic} >
+          Next Step
+        </button>
+
+      <div>
+        <label>
+          <input type="radio" name="configMode" checked={configFile === null} onChange={() => setConfigFile(null)} />
+          <span>No configuration (None)</span>
+        </label>
+
+        <label>
+          <input
+            type="radio"
+            name="configMode"
+            checked={configFile === "/myconfig.json"}
+            onChange={() => setConfigFile("/myconfig.json")}
+          />
+          <span>Use myconfig.json</span>
+        </label>
+      </div>
+
       <pre>{JSON.stringify(configFile, null, 2)}</pre>
+
       <hr />
+
       <button
         onClick={() =>
           addRow(
@@ -44,6 +64,7 @@ const ConfigComponent: FC<ConfigComponentProps> = ({ toLogic, configFile, setCon
       >
         Add Row
       </button>
+
       {test.map((row, index) => (
         <div key={index}>{row}</div>
       ))}

@@ -61,6 +61,10 @@ const DropzoneFile: React.FC<DropzoneFileProps> = ({
       if (entry && entry.isFile) {
         const file = item.getAsFile();
         if (file) {
+          if (!file.name.toLowerCase().endsWith(".json")) {
+            showTemporaryError("file have to be json");
+            return;
+          }
           try {
             const path = await window.electronAPI.getPathForFile(file);
             if (path) {
@@ -81,7 +85,7 @@ const DropzoneFile: React.FC<DropzoneFileProps> = ({
   const handleClick = async () => {
     if (disabled) return;
     try {
-      const path = await window.electronAPI.openFile();
+      const path = await window.electronAPI.openFile([{ name: "JSON", extensions: ["json"] }]);
       if (path) {
         onChange(path);
       }
