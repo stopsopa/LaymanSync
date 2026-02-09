@@ -3,6 +3,11 @@ export type MainTypes = {
   target: string;
   delete?: boolean;
 };
+export type MainOptionalTypes = {
+  source?: string;
+  target?: string;
+  delete?: boolean;
+};
 
 export type ProgressData = {
   progressPercentHuman: string;
