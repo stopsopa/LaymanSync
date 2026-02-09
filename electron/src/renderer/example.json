@@ -1,0 +1,12 @@
+[
+  {
+    "source": "/Users/xxx/Workspace/electron/src/tools",
+    "target": "/Users/xxx/Workspace/electron/src/tools2",
+    "delete": false
+  },
+  {
+    "source": "/Users/xxx/Workspace/electron/src/tools",
+    "target": "/Users/xxx/Workspace/electron/src/tools2",
+    "delete": true
+  }
+]

@@ -30,7 +30,7 @@ function Wizard() {
           })}
           onClick={() => setConfigWizzardStep(true)}
         >
-          <div className="wizard-dot">{!configWizzardStep ? "1" : "✓"}</div>
+          <div className="wizard-dot">{configWizzardStep ? "✓" : "1"}</div>
           <span className="wizard-label">Configure</span>
         </div>
 
