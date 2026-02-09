@@ -21,6 +21,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Open native file selection dialog
   openFile: (filters?: Electron.FileFilter[]) => ipcRenderer.invoke("dialog:openFile", filters),
 
+  // Open native save file dialog
+  saveFile: (options?: Electron.SaveDialogOptions) => ipcRenderer.invoke("dialog:saveFile", options),
+
   // Start sync/copy operation
   startSync: (options: { source: string; target: string; deleteMode: boolean }) =>
     ipcRenderer.send("sync:start", options),
@@ -57,6 +60,7 @@ declare global {
       openExternal: (url: string) => void;
       openDirectory: () => Promise<string | null>;
       openFile: (filters?: Electron.FileFilter[]) => Promise<string | null>;
+      saveFile: (options?: Electron.SaveDialogOptions) => Promise<string | null>;
       startSync: (options: { source: string; target: string; deleteMode: boolean }) => void;
       onSyncProgress: (callback: (data: any) => void) => () => void;
       onSyncLog: (callback: (line: string) => void) => () => void;

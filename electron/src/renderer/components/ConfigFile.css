@@ -1,0 +1,105 @@
+.config-file-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.config-file-section {
+  padding: var(--spacing-md);
+  border: 1px solid var(--aws-border);
+  border-radius: 8px;
+  background-color: var(--aws-white);
+  transition: all 0.2s ease;
+}
+
+.config-file-section.active {
+  border-color: var(--aws-orange);
+  box-shadow:
+    0 0 0 1px var(--aws-orange),
+    0 4px 12px rgba(255, 153, 0, 0.08);
+}
+
+.config-section-title {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: 0.85rem;
+  color: var(--aws-text-dark);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.config-file-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin: var(--spacing-xs) 0;
+}
+
+.config-file-divider::before,
+.config-file-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--aws-border);
+}
+
+.config-file-divider span {
+  padding: 0 var(--spacing-md);
+  font-size: 0.7rem;
+  color: var(--aws-text-light);
+  font-weight: 800;
+}
+
+.selected-config-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.selected-label {
+  font-weight: 700;
+  color: var(--aws-blue);
+  font-size: 0.8rem;
+}
+
+.selected-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.75rem;
+  background-color: #f1f3f3;
+  padding: var(--spacing-sm);
+  border-radius: 4px;
+  word-break: break-all;
+  border: 1px solid var(--aws-border);
+  color: var(--aws-text-dark);
+}
+
+.create-new-action {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  align-items: center;
+  padding: var(--spacing-md) 0;
+}
+
+.create-new-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 0.9rem;
+}
+
+.create-new-hint {
+  font-size: 0.75rem;
+  color: var(--aws-text-light);
+  text-align: center;
+  margin: 0;
+}
+
+.button-icon {
+  flex-shrink: 0;
+}

@@ -107,6 +107,16 @@ ipcMain.handle("dialog:openFile", async (_event, filters?: Electron.FileFilter[]
   return result.filePaths[0];
 });
 
+// Save file using native dialog
+ipcMain.handle("dialog:saveFile", async (_event, options?: Electron.SaveDialogOptions) => {
+  if (!mainWindow) return null;
+  const result = await dialog.showSaveDialog(mainWindow, options || {});
+  if (result.canceled || !result.filePath) {
+    return null;
+  }
+  return result.filePath;
+});
+
 // Get rclone version
 ipcMain.handle("app:getRcloneVersion", async () => {
   try {

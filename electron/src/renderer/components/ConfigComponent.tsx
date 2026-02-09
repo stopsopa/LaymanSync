@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { useState } from "react";
-import DropzoneFile from "./DropzoneFile";
+import ConfigFile from "./ConfigFile";
 
 type ConfigComponentProps = {
   toLogic: () => void;
@@ -18,21 +18,14 @@ const ConfigComponent: FC<ConfigComponentProps> = ({ toLogic, configFile, setCon
   return (
     <div className="wizard-step-content">
       <h3 className="section-title">Configuration</h3>
-      <div>
 
-        <DropzoneFile onChange={setConfigFile}>
-          {configFile ? (
-            <div>
-              <span>Selected Configuration:</span>
-              <code>{configFile}</code>
-            </div>
-          ) : null}
-        </DropzoneFile>
+      <div>
+        <ConfigFile value={configFile} onChange={setConfigFile} />
       </div>
 
-        <button onClick={toLogic} >
-          Next Step
-        </button>
+      <button onClick={toLogic}>
+        Next Step
+      </button>
 
       <div>
         <label>
