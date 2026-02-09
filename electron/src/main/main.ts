@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell, dialog } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import { exec } from "child_process";
@@ -80,6 +80,18 @@ app.on("activate", () => {
 // Reveal directory in Finder/Explorer
 ipcMain.on("directory:reveal", (_event, dirPath: string) => {
   shell.showItemInFolder(dirPath);
+});
+
+// Select directory using native dialog
+ipcMain.handle("dialog:openDirectory", async () => {
+  if (!mainWindow) return null;
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ["openDirectory"],
+  });
+  if (result.canceled || result.filePaths.length === 0) {
+    return null;
+  }
+  return result.filePaths[0];
 });
 
 // Get rclone version

@@ -15,6 +15,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Open URL in system browser
   openExternal: (url: string) => ipcRenderer.send("app:openExternal", url),
 
+  // Open native directory selection dialog
+  openDirectory: () => ipcRenderer.invoke("dialog:openDirectory"),
+
   // Start sync/copy operation
   startSync: (options: { source: string; target: string; deleteMode: boolean }) =>
     ipcRenderer.send("sync:start", options),
@@ -49,6 +52,7 @@ declare global {
       revealDirectory: (dirPath: string) => void;
       getRcloneVersion: () => Promise<string>;
       openExternal: (url: string) => void;
+      openDirectory: () => Promise<string | null>;
       startSync: (options: { source: string; target: string; deleteMode: boolean }) => void;
       onSyncProgress: (callback: (data: any) => void) => () => void;
       onSyncLog: (callback: (line: string) => void) => () => void;
