@@ -19,8 +19,8 @@ const ConfigComponent: FC<ConfigComponentProps> = ({ toLogic, configFile, setCon
     <div className="wizard-step-content" style={{ padding: "10px" }}>
       <h3 className="section-title">Configuration</h3>
 
-      <div>
-        <ConfigFile value={configFile} onChange={setConfigFile} />
+      <div style={{ marginBottom: "var(--spacing-lg)" }}>
+        <ConfigFile value={configFile} onChange={setConfigFile} onNext={toLogic} />
       </div>
 
       {/* <button onClick={toLogic}>Next Step</button>

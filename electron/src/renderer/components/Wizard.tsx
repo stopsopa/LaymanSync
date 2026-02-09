@@ -7,7 +7,7 @@ import clsx from "clsx";
 function Wizard() {
   const [configFile, setConfigFile] = useState<string | null>(null);
 
-  const [configWizzardStep, setConfigWizzardStep] = useState(false);
+  const [configWizzardStep, setConfigWizzardStep] = useState(true);
 
   function selectLogicView() {
     if (configFile) {
