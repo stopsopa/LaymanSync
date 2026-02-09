@@ -42,9 +42,6 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
           </p>
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={toConfig} className="aws-button">
-            Back to Select File
-          </button>
           <button onClick={handleAddItem} className="aws-button aws-button-primary">
             + Add New Entry
           </button>
