@@ -18,6 +18,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Open native directory selection dialog
   openDirectory: () => ipcRenderer.invoke("dialog:openDirectory"),
 
+  // Open native file selection dialog
+  openFile: () => ipcRenderer.invoke("dialog:openFile"),
+
   // Start sync/copy operation
   startSync: (options: { source: string; target: string; deleteMode: boolean }) =>
     ipcRenderer.send("sync:start", options),
@@ -53,6 +56,7 @@ declare global {
       getRcloneVersion: () => Promise<string>;
       openExternal: (url: string) => void;
       openDirectory: () => Promise<string | null>;
+      openFile: () => Promise<string | null>;
       startSync: (options: { source: string; target: string; deleteMode: boolean }) => void;
       onSyncProgress: (callback: (data: any) => void) => () => void;
       onSyncLog: (callback: (line: string) => void) => () => void;

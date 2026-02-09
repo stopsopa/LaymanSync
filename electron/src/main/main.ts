@@ -94,6 +94,18 @@ ipcMain.handle("dialog:openDirectory", async () => {
   return result.filePaths[0];
 });
 
+// Select file using native dialog
+ipcMain.handle("dialog:openFile", async () => {
+  if (!mainWindow) return null;
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ["openFile"],
+  });
+  if (result.canceled || result.filePaths.length === 0) {
+    return null;
+  }
+  return result.filePaths[0];
+});
+
 // Get rclone version
 ipcMain.handle("app:getRcloneVersion", async () => {
   try {
