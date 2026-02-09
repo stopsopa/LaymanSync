@@ -46,7 +46,6 @@ function Wizard() {
           <span className="wizard-label">Execute</span>
         </div>
       </div>
-      <pre>{JSON.stringify({ configWizzardStep, configFile }, null, 2)}</pre>
 
       {/* Step Content Area */}
       <div className="wizard-content">
