@@ -11,106 +11,119 @@ import type { MainTypes, DriveCompressionOptions } from "./commonTypes.js";
 export default async function driveCompression(options: DriveCompressionOptions) {
   const { source, target, progressEvent, log, end } = options;
 
-  const mainExec = determineBinaryAbsolutePath();
+  let mainExec;
+  let action, flags, sourcePath, destPath;
+  try {
+    mainExec = determineBinaryAbsolutePath();
 
-  const [action, flags, sourcePath, destPath] = generateRcloneParams({
-    source,
-    target,
-    delete: options.delete ?? false,
-  });
+    [action, flags, sourcePath, destPath] = generateRcloneParams({
+      source,
+      target,
+      delete: options.delete ?? false,
+    });
+  } catch (e: any) {
+    end(e.message, "0.0s");
+    return;
+  }
 
   const args = [action, ...flags, sourcePath, destPath];
 
   const startTime = Date.now();
 
   return new Promise<void>((resolve) => {
-    /**
-     * Internal state to avoid duplicate progress events if needed,
-     * although rclone with 1s stats interval is fine.
-     */
-    let lastPercent = "";
+    try {
+      /**
+       * Internal state to avoid duplicate progress events if needed,
+       * although rclone with 1s stats interval is fine.
+       */
+      let lastPercent = "";
 
-    const child = spawn(mainExec, args);
+      const child = spawn(mainExec, args);
 
-    let stdoutRemainder = "";
-    let stderrRemainder = "";
+      let stdoutRemainder = "";
+      let stderrRemainder = "";
 
-    const handleData = (data: Buffer, isStdout: boolean) => {
-      const text = (isStdout ? stdoutRemainder : stderrRemainder) + data.toString();
-      const lines = text.split(/\r?\n/);
-      const remainder = lines.pop() || "";
+      const handleData = (data: Buffer, isStdout: boolean) => {
+        const text = (isStdout ? stdoutRemainder : stderrRemainder) + data.toString();
+        const lines = text.split(/\r?\n/);
+        const remainder = lines.pop() || "";
 
-      if (isStdout) {
-        stdoutRemainder = remainder;
-      } else {
-        stderrRemainder = remainder;
-      }
-
-      for (const line of lines) {
-        if (!line.trim()) continue;
-
-        if (log) {
-          log(line);
+        if (isStdout) {
+          stdoutRemainder = remainder;
+        } else {
+          stderrRemainder = remainder;
         }
 
-        // Parse progress from rclone aggregate stats line
-        // Example: 299.147 MiB / 662.034 MiB, 45%, 0 B/s, ETA - (xfr#8137/18149)
-        // We look for a line that starts with counts (e.g. "1.2 MiB / 10 MiB, 12%")
-        const match = line.match(/^\d*.\d* [^\s]+ \/ \d*.\d* [^\s]+, (\d+)%, \d+.*$/);
-        if (match && match[1]) {
-          // Trigger progressEvent only if the percentage changed
-          if (match[1] !== lastPercent) {
-            lastPercent = match[1];
+        for (const line of lines) {
+          if (!line.trim()) continue;
 
-            const progressPercentNum = parseInt(match[1], 10);
+          if (log) {
+            log(line);
+          }
 
-            const now = Date.now();
-            const totalTimePassedMs = now - startTime;
+          // Parse progress from rclone aggregate stats line
+          // Example: 299.147 MiB / 662.034 MiB, 45%, 0 B/s, ETA - (xfr#8137/18149)
+          // We look for a line that starts with counts (e.g. "1.2 MiB / 10 MiB, 12%")
+          const match = line.match(/^\d*.\d* [^\s]+ \/ \d*.\d* [^\s]+, (\d+)%, \d+.*$/);
+          if (match && match[1]) {
+            // Trigger progressEvent only if the percentage changed
+            if (match[1] !== lastPercent) {
+              lastPercent = match[1];
 
-            let estimatedRemainingTimeMs = 0;
-            let estimatedTotalTimeMs = 0;
+              const progressPercentNum = parseInt(match[1], 10);
 
-            if (progressPercentNum > 0) {
-              const totalMs = (totalTimePassedMs / progressPercentNum) * 100;
-              estimatedTotalTimeMs = Math.round(totalMs);
-              estimatedRemainingTimeMs = Math.round(totalMs - totalTimePassedMs);
-            }
+              const now = Date.now();
+              const totalTimePassedMs = now - startTime;
 
-            if (progressEvent) {
-              progressEvent({
-                progressPercentHuman: `${match[1]}%`,
-                totalTimePassedHuman: timeHumanReadable(totalTimePassedMs),
-                estimatedTotalTimeHuman: progressPercentNum > 0 ? timeHumanReadable(estimatedTotalTimeMs) : "?",
-                estimatedRemainingTimeHuman: progressPercentNum > 0 ? timeHumanReadable(estimatedRemainingTimeMs) : "?",
-              });
+              let estimatedRemainingTimeMs = 0;
+              let estimatedTotalTimeMs = 0;
+
+              if (progressPercentNum > 0) {
+                const totalMs = (totalTimePassedMs / progressPercentNum) * 100;
+                estimatedTotalTimeMs = Math.round(totalMs);
+                estimatedRemainingTimeMs = Math.round(totalMs - totalTimePassedMs);
+              }
+
+              if (progressEvent) {
+                progressEvent({
+                  progressPercentHuman: `${match[1]}%`,
+                  totalTimePassedHuman: timeHumanReadable(totalTimePassedMs),
+                  estimatedTotalTimeHuman: progressPercentNum > 0 ? timeHumanReadable(estimatedTotalTimeMs) : "?",
+                  estimatedRemainingTimeHuman:
+                    progressPercentNum > 0 ? timeHumanReadable(estimatedRemainingTimeMs) : "?",
+                });
+              }
             }
           }
         }
-      }
-    };
+      };
 
-    child.stdout.on("data", (data) => handleData(data, true));
-    child.stderr.on("data", (data) => handleData(data, false));
+      child.stdout.on("data", (data) => handleData(data, true));
+      child.stderr.on("data", (data) => handleData(data, false));
 
-    child.on("error", (err) => {
-      const duration = timeHumanReadable(Date.now() - startTime);
-      end(err.message, duration);
+      child.on("error", (err) => {
+        const duration = timeHumanReadable(Date.now() - startTime);
+        end(err.message, duration);
+        resolve();
+      });
+
+      child.on("close", (code) => {
+        // Process remaining content if any
+        if (stdoutRemainder && log) log(stdoutRemainder);
+        if (stderrRemainder && log) log("[stderr] " + stderrRemainder);
+
+        const duration = timeHumanReadable(Date.now() - startTime);
+        if (code === 0) {
+          end(null, duration);
+        } else {
+          // Collect some stderr for context if available
+          end(`Process exited with code ${code}`, duration);
+        }
+        resolve();
+      });
+    } catch (e: any) {
+      end(e.message, "0.0s");
       resolve();
-    });
-
-    child.on("close", (code) => {
-      // Process remaining content if any
-      if (stdoutRemainder && log) log(stdoutRemainder);
-      if (stderrRemainder && log) log("[stderr] " + stderrRemainder);
-
-      const duration = timeHumanReadable(Date.now() - startTime);
-      if (code === 0) {
-        end(null, duration);
-      } else {
-        // Collect some stderr for context if available
-        end(`Process exited with code ${code}`, duration);
-      }
-      resolve();
-    });
+    }
   });
 }

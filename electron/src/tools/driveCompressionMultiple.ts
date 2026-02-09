@@ -11,11 +11,11 @@ import type { ProgressData, MainTypes } from "./commonTypes.js";
 const __filename = fileURLToPath(import.meta.url);
 
 export default async function driveCompressionMultiple(options: DriveCompressionOptions[]) {
-  for (const option of options) {
+  for (const [i, option] of options.entries()) {
     try {
       await driveCompression(option);
     } catch (e) {
-      console.log(`driveCompressionMultiple catch error: ${e}`);
+      console.log(`driveCompressionMultiple(${i}) catch error: ${e}`);
     }
   }
 }
@@ -51,10 +51,10 @@ if (isMain) {
         ...o,
 
         progressEvent: (data: ProgressData) => {
-          console.log(`progressEvent(${i}):`, data);
+          // console.log(`progressEvent(${i}):`, data);
         },
         log: (line) => {
-          console.log(`log(${i}):`, line);
+          // console.log(`log(${i}):`, line);
         },
         end: (error, duration) => {
           console.log(`end(${i}):`, error, duration);

@@ -1,6 +1,6 @@
 
 # 
-# /bin/bash testbatch.sh structure.json structure-gen.json
+# /bin/bash testbatch.sh structure.json structure-gen.json 2>&1 | tee log.log
 # 
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

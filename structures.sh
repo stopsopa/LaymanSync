@@ -16,33 +16,34 @@ function cfiles {
 
 }
 function set1 {
-    _DIR="${1}/child"
+    _DIR="${DIR}/dir${1}/child"
     mkdir -p "${_DIR}"
+    echo "test${1}" > "${_DIR}/__dir_${1}.txt"
 
-    touch "${_DIR}/file1.txt"
-    touch "${_DIR}/file2.txt"
-    touch "${_DIR}/file3.txt"
-    touch "${_DIR}/file4.txt"
+    touch "${_DIR}/${1}_file1.txt"
+    touch "${_DIR}/${1}_file2.txt"
+    touch "${_DIR}/${1}_file3.txt"
+    touch "${_DIR}/${1}_file4.txt"
     
-    cfiles "${_DIR}/child1"
+    cfiles "${_DIR}/${1}_child1"
 
-    cfiles "${_DIR}/child2"
+    cfiles "${_DIR}/${1}_child2"
 
-    cfiles "${_DIR}/child3"
+    cfiles "${_DIR}/${1}_child3"
 
-    cfiles "${_DIR}/child4"
+    cfiles "${_DIR}/${1}_child4"
 }
 
-set1 "${DIR}/dir01"
-set1 "${DIR}/dir02"
-set1 "${DIR}/dir03"
-set1 "${DIR}/dir04"
-set1 "${DIR}/dir05"
-set1 "${DIR}/dir06"
-set1 "${DIR}/dir07"
-set1 "${DIR}/dir08"
-set1 "${DIR}/dir09"
-set1 "${DIR}/dir10"
+set1 "01"
+set1 "02"
+set1 "03"
+set1 "04"
+set1 "05"
+set1 "06"
+set1 "07"
+set1 "08"
+set1 "09"
+set1 "10"
 
 mkdir -p "${DIR}/target01"
 mkdir -p "${DIR}/target02"
