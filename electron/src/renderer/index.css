@@ -10,8 +10,9 @@
   --aws-white: #ffffff;
   --aws-green: #1d8102;
   --aws-red: #d13212;
-  --aws-font: "Amazon Ember", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  
+  --aws-font:
+    "Amazon Ember", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -22,7 +23,9 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -124,12 +127,12 @@ html, body, #root {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 28, 36, 0.5); 
+  background: rgba(0, 28, 36, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
-  backdrop-filter: blur(1px);
+  z-index: 9999;
+  backdrop-filter: blur(2px);
 }
 
 .modal-content {
@@ -150,14 +153,16 @@ html, body, #root {
   background-color: #fafafa;
 }
 
-.modal-header h2, .modal-header .modal-title {
+.modal-header h2,
+.modal-header .modal-title {
   font-size: 1rem;
   font-weight: 700;
   margin: 0;
   color: var(--aws-text-dark);
 }
 
-.modal-header .close-btn, .modal-header .close-x-btn {
+.modal-header .close-btn,
+.modal-header .close-x-btn {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -171,7 +176,8 @@ html, body, #root {
   transition: color 0.2s;
 }
 
-.modal-header .close-btn:hover, .modal-header .close-x-btn:hover {
+.modal-header .close-btn:hover,
+.modal-header .close-x-btn:hover {
   color: var(--aws-text-dark);
 }
 

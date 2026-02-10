@@ -1,4 +1,5 @@
-import './ConfirmationModal.css';
+import { createPortal } from "react-dom";
+import "./ConfirmationModal.css";
 
 interface ConfirmationModalProps {
   title: string;
@@ -8,25 +9,27 @@ interface ConfirmationModalProps {
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
-  type?: 'delete' | 'warning';
+  type?: "delete" | "warning";
 }
 
-function ConfirmationModal({ 
-  title, 
-  message, 
-  items, 
-  confirmLabel = 'Confirm', 
-  cancelLabel = 'Cancel', 
-  onConfirm, 
+function ConfirmationModal({
+  title,
+  message,
+  items,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  onConfirm,
   onCancel,
-  type = 'warning' 
+  type = "warning",
 }: ConfirmationModalProps) {
-  return (
+  const modalContent = (
     <div className="modal-overlay" onClick={onCancel}>
       <div className="modal-content confirmation-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className={`modal-header ${type === 'delete' ? 'delete-header' : ''}`}>
+        <div className={`modal-header ${type === "delete" ? "delete-header" : ""}`}>
           <h2>{title}</h2>
-          <button className="close-btn" onClick={onCancel}>&times;</button>
+          <button className="close-btn" onClick={onCancel}>
+            &times;
+          </button>
         </div>
         <div className="modal-body">
           <p className="confirmation-message">{message}</p>
@@ -41,9 +44,11 @@ function ConfirmationModal({
           )}
         </div>
         <div className="modal-footer">
-          <button className="aws-button aws-button-secondary" onClick={onCancel}>{cancelLabel}</button>
-          <button 
-            className={`aws-button ${type === 'delete' ? 'aws-button-danger' : 'aws-button-primary'}`} 
+          <button className="aws-button aws-button-secondary" onClick={onCancel}>
+            {cancelLabel}
+          </button>
+          <button
+            className={`aws-button ${type === "delete" ? "aws-button-danger" : "aws-button-primary"}`}
             onClick={onConfirm}
           >
             {confirmLabel}
@@ -52,6 +57,8 @@ function ConfirmationModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
 export default ConfirmationModal;
