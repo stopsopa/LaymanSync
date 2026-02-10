@@ -234,18 +234,3 @@ body,
     transform: translateY(4px);
   }
 }
-
-/* Anchor Positioning - Modern browsers (Chrome 125+) */
-#popover-reset {
-  position-anchor: --anchor-reset;
-  bottom: anchor(top);
-  left: anchor(center);
-  transform: translateX(-50%) translateY(-8px);
-}
-
-#popover-start {
-  position-anchor: --anchor-start;
-  bottom: anchor(top);
-  left: anchor(center);
-  transform: translateX(-50%) translateY(-8px);
-}

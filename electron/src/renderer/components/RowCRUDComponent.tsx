@@ -100,9 +100,9 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
       const popoverRect = popover.getBoundingClientRect();
 
       popover.style.position = "fixed";
-      // Position above: trigger top - popover height - gap (8px)
-      popover.style.top = `${rect.top - popoverRect.height - 8}px`;
-      popover.style.left = `${rect.left}px`;
+      popover.style.left = `${rect.left + rect.width / 2 - popoverRect.width / 2}px`;
+      popover.style.top = `${rect.top - popoverRect.height - 12}px`;
+      popover.style.margin = "0";
     }
   };
 
@@ -295,13 +295,13 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
             </div>
             <button
               onClick={handleRevealSource}
-              disabled={!item.source || isSyncing}
+              disabled={!item.source || isSyncing || !dirExistence?.source}
               className="aws-button aws-button-secondary"
               style={{
                 marginTop: "16px",
                 whiteSpace: "nowrap",
-                opacity: item.source && !isSyncing ? 1 : 0.5,
-                cursor: item.source && !isSyncing ? "pointer" : "not-allowed",
+                opacity: item.source && !isSyncing && dirExistence?.source ? 1 : 0.5,
+                cursor: item.source && !isSyncing && dirExistence?.source ? "pointer" : "not-allowed",
                 padding: "4px 10px",
                 fontSize: "0.75rem",
                 height: "34px",
@@ -358,13 +358,13 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
             </div>
             <button
               onClick={handleRevealTarget}
-              disabled={!item.target || isSyncing}
+              disabled={!item.target || isSyncing || !dirExistence?.target}
               className="aws-button aws-button-secondary"
               style={{
                 marginTop: "16px",
                 whiteSpace: "nowrap",
-                opacity: item.target && !isSyncing ? 1 : 0.5,
-                cursor: item.target && !isSyncing ? "pointer" : "not-allowed",
+                opacity: item.target && !isSyncing && dirExistence?.target ? 1 : 0.5,
+                cursor: item.target && !isSyncing && dirExistence?.target ? "pointer" : "not-allowed",
                 padding: "4px 10px",
                 fontSize: "0.75rem",
                 height: "34px",
@@ -389,7 +389,13 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
             )
           }
           onMouseLeave={hidePopover}
-          style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            // @ts-ignore - anchorName is new
+            anchorName: `--anchor-delete-${index}`,
+          }}
         >
           <div
             style={{
@@ -433,7 +439,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
 
         <div
           ref={popoverRef}
-          popover="auto"
+          popover="manual"
           style={{
             padding: "12px 16px",
             background: "#333",
@@ -446,8 +452,6 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
             position: "fixed",
             margin: "0",
             pointerEvents: "none",
-            left: "-9999px", // Start offscreen
-            top: "-9999px",
             zIndex: 9999,
           }}
         >

@@ -120,50 +120,89 @@ const LogicComponent: FC<LogicComponentProps> = ({
           justifyContent: "flex-end",
           gap: "12px",
           alignItems: "center",
+          position: "relative",
         }}
       >
-        <div id="popover-reset" popover="manual">
+        <div
+          id="popover-reset"
+          popover="manual"
+          className="aws-popover"
+          style={{
+            position: "fixed",
+            margin: 0,
+            pointerEvents: "none",
+            zIndex: 10000,
+          }}
+        >
           Clears all sync progress, logs, and status from the previous run to allow a fresh start or new changes.
         </div>
-        <button
-          className="aws-button aws-button-secondary"
-          onClick={onReset}
-          disabled={!isFinished || isSyncing}
-          onMouseEnter={(e) => (e.currentTarget.previousElementSibling as any)?.showPopover()}
-          onMouseLeave={(e) => (e.currentTarget.previousElementSibling as any)?.hidePopover()}
-          style={
-            {
+        <div
+          onMouseEnter={(e: any) => {
+            const wrapper = e.currentTarget;
+            const popover = document.getElementById("popover-reset") as HTMLElement;
+            const rect = wrapper.getBoundingClientRect();
+            popover.showPopover();
+            const popoverRect = popover.getBoundingClientRect();
+            popover.style.left = `${rect.left + rect.width / 2 - popoverRect.width / 2}px`;
+            popover.style.top = `${rect.top - popoverRect.height - 12}px`;
+          }}
+          onMouseLeave={() => (document.getElementById("popover-reset") as any)?.hidePopover()}
+          style={{ display: "inline-block" }}
+        >
+          <button
+            className="aws-button aws-button-secondary"
+            onClick={onReset}
+            disabled={!isFinished || isSyncing}
+            style={{
               minWidth: "100px",
               opacity: !isFinished || isSyncing ? 0.5 : 1,
               cursor: !isFinished || isSyncing ? "not-allowed" : "pointer",
-              anchorName: "--anchor-reset",
-            } as any
-          }
-        >
-          Reset
-        </button>
+            }}
+          >
+            Reset
+          </button>
+        </div>
 
-        <div id="popover-start" popover="manual">
+        <div
+          id="popover-start"
+          popover="manual"
+          className="aws-popover"
+          style={{
+            position: "fixed",
+            margin: 0,
+            pointerEvents: "none",
+            zIndex: 10000,
+          }}
+        >
           Launches the rclone sync/copy process for all directories defined in the configuration file.
         </div>
-        <button
-          className="aws-button aws-button-primary"
-          onClick={onStart}
-          disabled={isSyncing || data.length === 0}
-          onMouseEnter={(e) => (e.currentTarget.previousElementSibling as any)?.showPopover()}
-          onMouseLeave={(e) => (e.currentTarget.previousElementSibling as any)?.hidePopover()}
-          style={
-            {
+        <div
+          onMouseEnter={(e: any) => {
+            const wrapper = e.currentTarget;
+            const popover = document.getElementById("popover-start") as HTMLElement;
+            const rect = wrapper.getBoundingClientRect();
+            popover.showPopover();
+            const popoverRect = popover.getBoundingClientRect();
+            popover.style.left = `${rect.left + rect.width / 2 - popoverRect.width / 2}px`;
+            popover.style.top = `${rect.top - popoverRect.height - 12}px`;
+          }}
+          onMouseLeave={() => (document.getElementById("popover-start") as any)?.hidePopover()}
+          style={{ display: "inline-block" }}
+        >
+          <button
+            className="aws-button aws-button-primary"
+            onClick={onStart}
+            disabled={isSyncing || data.length === 0}
+            style={{
               minWidth: "140px",
               padding: "10px 24px",
               opacity: isSyncing || data.length === 0 ? 0.5 : 1,
               cursor: isSyncing || data.length === 0 ? "not-allowed" : "pointer",
-              anchorName: "--anchor-start",
-            } as any
-          }
-        >
-          {isSyncing ? "Syncing..." : "Start Sync"}
-        </button>
+            }}
+          >
+            {isSyncing ? "Syncing..." : "Start Sync"}
+          </button>
+        </div>
       </div>
     </div>
   );
