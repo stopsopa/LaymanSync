@@ -19,6 +19,12 @@
   background-color: rgba(0, 115, 187, 0.02);
 }
 
+.custom-dropzone-directory.global-dragging {
+  border-color: var(--aws-blue);
+  background-color: rgba(0, 115, 187, 0.05);
+  box-shadow: 0 0 10px rgba(0, 115, 187, 0.2);
+}
+
 .custom-dropzone-directory.dragging {
   border-color: var(--aws-orange);
   background-color: rgba(255, 153, 0, 0.05);

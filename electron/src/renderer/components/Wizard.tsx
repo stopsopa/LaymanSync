@@ -135,6 +135,7 @@ function Wizard() {
           className={clsx("wizard-step", {
             completed: !configWizzardStep,
             active: configWizzardStep,
+            disabled: isSyncing,
           })}
           onClick={() => !isSyncing && setConfigWizzardStep(true)}
           style={{ cursor: isSyncing ? "not-allowed" : "pointer" }}
@@ -146,7 +147,7 @@ function Wizard() {
         <div
           className={clsx("wizard-step", {
             completed: isFinished,
-            disabled: !Boolean(configFile),
+            disabled: !Boolean(configFile) || isSyncing,
             active: !configWizzardStep,
           })}
           onClick={() => !isSyncing && selectLogicView()}

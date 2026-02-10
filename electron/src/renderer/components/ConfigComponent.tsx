@@ -1,5 +1,4 @@
 import type { FC } from "react";
-import { useState } from "react";
 import ConfigFile from "./ConfigFile";
 
 type ConfigComponentProps = {
@@ -9,12 +8,6 @@ type ConfigComponentProps = {
 };
 
 const ConfigComponent: FC<ConfigComponentProps> = ({ toLogic, configFile, setConfigFile }) => {
-  const [test, setTest] = useState<string[]>([]);
-
-  const addRow = (row: string) => {
-    setTest((prev) => [...prev, row]);
-  };
-
   return (
     <div className="wizard-step-content" style={{ padding: "10px" }}>
       <h3 className="section-title">Configuration</h3>

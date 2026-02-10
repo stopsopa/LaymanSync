@@ -6,61 +6,10 @@
   overflow: hidden;
 }
 
-.tabs-header {
-  display: flex;
-  background-color: var(--aws-white);
-  border-bottom: 1px solid var(--aws-border);
-  padding: 0 var(--spacing-md);
-  flex-shrink: 0;
-}
-
-.tab-button {
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  font-family: var(--aws-font);
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--aws-text-light);
-  transition: all 0.2s ease;
-}
-
-.tab-button:hover {
-  color: var(--aws-text-dark);
-}
-
-.tab-button.active {
-  color: var(--aws-orange);
-  border-bottom-color: var(--aws-orange);
-}
-
 .tab-viewport {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-}
-
-.app-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: var(--spacing-md);
-  gap: var(--spacing-md);
-  overflow: hidden;
-  min-height: 0;
-}
-
-.manual-selectors {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-md);
-  background-color: var(--aws-white);
-  border: 1px solid var(--aws-border);
-  border-radius: 2px;
-  padding: var(--spacing-md);
-  flex-shrink: 0;
 }

@@ -87,6 +87,7 @@
 
 .wizard-step.disabled {
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .wizard-step.disabled .wizard-dot {

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import "./DropzoneDirectory.css";
 
 interface DropzoneDirectoryProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
@@ -14,7 +14,40 @@ const DropzoneDirectory: React.FC<DropzoneDirectoryProps> = ({
   ...rest
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isGlobalDragging, setIsGlobalDragging] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let dragCounter = 0;
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      dragCounter++;
+      if (dragCounter > 0 && !disabled) {
+        setIsGlobalDragging(true);
+      }
+    };
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      dragCounter--;
+      if (dragCounter <= 0) {
+        setIsGlobalDragging(false);
+      }
+    };
+    const handleDropGlobal = () => {
+      dragCounter = 0;
+      setIsGlobalDragging(false);
+    };
+
+    window.addEventListener("dragenter", handleDragEnter);
+    window.addEventListener("dragleave", handleDragLeave);
+    window.addEventListener("drop", handleDropGlobal);
+
+    return () => {
+      window.removeEventListener("dragenter", handleDragEnter);
+      window.removeEventListener("dragleave", handleDragLeave);
+      window.removeEventListener("drop", handleDropGlobal);
+    };
+  }, [disabled]);
 
   const showTemporaryError = (message: string) => {
     setErrorMessage(message);
@@ -32,7 +65,7 @@ const DropzoneDirectory: React.FC<DropzoneDirectoryProps> = ({
     [disabled],
   );
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
+  const handleLocalDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -43,6 +76,7 @@ const DropzoneDirectory: React.FC<DropzoneDirectoryProps> = ({
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(false);
+      setIsGlobalDragging(false);
 
       if (disabled) return;
 
@@ -93,9 +127,9 @@ const DropzoneDirectory: React.FC<DropzoneDirectoryProps> = ({
   return (
     <div
       {...rest}
-      className={`custom-dropzone-directory ${isDragging ? "dragging" : ""} ${disabled ? "disabled" : ""} ${errorMessage ? "has-error" : ""} ${className}`.trim()}
+      className={`custom-dropzone-directory ${isDragging ? "dragging" : ""} ${isGlobalDragging ? "global-dragging" : ""} ${disabled ? "disabled" : ""} ${errorMessage ? "has-error" : ""} ${className}`.trim()}
       onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
+      onDragLeave={handleLocalDragLeave}
       onDrop={handleDrop}
       onClick={handleClick}
     >

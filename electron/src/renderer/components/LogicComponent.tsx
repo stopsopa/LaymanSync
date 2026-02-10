@@ -15,7 +15,7 @@ import { useConfigManager } from "../tools/ConfigManager";
 import RowCRUDComponent from "./RowCRUDComponent";
 
 const LogicComponent: FC<LogicComponentProps> = ({
-  toConfig,
+  toConfig: _toConfig,
   isSyncing,
   isFinished,
   rowStates,

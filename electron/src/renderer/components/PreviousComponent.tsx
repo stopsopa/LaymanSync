@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import DirectorySelector from './DirectorySelector';
-import DirectoryDisplay from './DirectoryDisplay';
-import DeleteModeToggle from './DeleteModeToggle';
-import SyncProgress from './SyncProgress';
-import LogViewer from './LogViewer';
-import StatusModal from './StatusModal';
+import { useState, useEffect } from "react";
+import DirectorySelector from "./DirectorySelector";
+import DirectoryDisplay from "./DirectoryDisplay";
+import DeleteModeToggle from "./DeleteModeToggle";
+import SyncProgress from "./SyncProgress";
+import LogViewer from "./LogViewer";
+import StatusModal from "./StatusModal";
 
 interface ProgressData {
   progressPercentHuman: string;
@@ -20,32 +20,39 @@ function PreviousComponent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
-  const [completionStatus, setCompletionStatus] = useState<'success' | 'error' | null>(null);
+  const [completionStatus, setCompletionStatus] = useState<"success" | "error" | null>(null);
   const [completionMessage, setCompletionMessage] = useState<string | null>(null);
   const [completionDuration, setCompletionDuration] = useState<string | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
 
   // Set up IPC event listeners
   useEffect(() => {
-    const unsubProgress = window.electronAPI.onSyncProgress((data: ProgressData) => {
-      setProgress(data);
-    });
-
-    const unsubLog = window.electronAPI.onSyncLog((line: string) => {
-      setLogs(prev => [...prev, line]);
-    });
-
-    const unsubEnd = window.electronAPI.onSyncEnd((result: { error: string | null; duration: string }) => {
-      setCompletionDuration(result.duration);
-      if (result.error) {
-        setCompletionStatus('error');
-        setCompletionMessage(result.error);
-      } else {
-        setCompletionStatus('success');
-        setCompletionMessage(`The ${deleteMode ? 'sync' : 'copy'} operation completed successfully.`);
+    const unsubProgress = window.electronAPI.onSyncProgress((event) => {
+      // For this simple component, we assume index 0
+      if (event.index === 0) {
+        setProgress(event.data);
       }
-      setShowStatusModal(true);
-      setIsProcessing(false);
+    });
+
+    const unsubLog = window.electronAPI.onSyncLog((event) => {
+      if (event.index === 0) {
+        setLogs((prev) => [...prev, event.line]);
+      }
+    });
+
+    const unsubEnd = window.electronAPI.onSyncEnd((result) => {
+      if (result.index === 0) {
+        setCompletionDuration(result.duration);
+        if (result.error) {
+          setCompletionStatus("error");
+          setCompletionMessage(result.error);
+        } else {
+          setCompletionStatus("success");
+          setCompletionMessage(`The ${deleteMode ? "sync" : "copy"} operation completed successfully.`);
+        }
+        setShowStatusModal(true);
+        setIsProcessing(false);
+      }
     });
 
     return () => {
@@ -96,6 +103,7 @@ function PreviousComponent() {
       source,
       target,
       deleteMode,
+      index: 0,
     });
   };
 
@@ -123,18 +131,10 @@ function PreviousComponent() {
         )}
 
         {/* Section 2: Directory Display */}
-        <DirectoryDisplay
-          source={source}
-          target={target}
-          onShowInFinder={handleShowInFinder}
-        />
+        <DirectoryDisplay source={source} target={target} onShowInFinder={handleShowInFinder} />
 
         {/* Section 3: Delete Mode Toggle */}
-        <DeleteModeToggle
-          deleteMode={deleteMode}
-          onChange={handleDeleteModeChange}
-          disabled={isProcessing}
-        />
+        <DeleteModeToggle deleteMode={deleteMode} onChange={handleDeleteModeChange} disabled={isProcessing} />
 
         {/* Section 4: Progress Bar and Start Button */}
         <SyncProgress
@@ -155,7 +155,7 @@ function PreviousComponent() {
       {showStatusModal && completionStatus && completionMessage && (
         <StatusModal
           type={completionStatus}
-          title={completionStatus === 'success' ? 'Completed Successfully' : 'Operation Failed'}
+          title={completionStatus === "success" ? "Completed Successfully" : "Operation Failed"}
           message={completionMessage}
           duration={completionDuration || undefined}
           onClose={() => setShowStatusModal(false)}
