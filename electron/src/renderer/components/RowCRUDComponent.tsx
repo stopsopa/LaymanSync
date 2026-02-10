@@ -100,7 +100,17 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
     }
   };
 
-  const progressPercent = state?.progress?.progressPercentHuman || (state?.status === "done" ? "100%" : "0%");
+  // Auto-expand logs when sync starts or ends, collapse on reset
+  useEffect(() => {
+    if (state?.status === "running" || state?.status === "done" || state?.status === "error") {
+      setIsLogsExpanded(true);
+    } else if (!state || state.status === "waiting") {
+      setIsLogsExpanded(false);
+    }
+  }, [state?.status]);
+
+  const progressPercent =
+    state?.status === "done" || state?.status === "error" ? "100%" : state?.progress?.progressPercentHuman || "0%";
   const statusLabel = () => {
     if (!state) return "WAITING IN QUEUE";
     if (state.status === "running") return `SYNCING: ${progressPercent}`;
