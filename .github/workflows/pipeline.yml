@@ -426,7 +426,7 @@ jobs:
   # Gate: Production Approval
   # Similar to qa-gate: Stops the branch gracefully on Rejection/Timeout.
   bump-gate:
-    name: 🛡️ Bump Gate
+    name: 🛡️ Prod Gate
     needs: qa-build
     runs-on: ubuntu-latest
     environment: production
@@ -439,10 +439,10 @@ jobs:
         run: |
           echo "approved=true" >> $GITHUB_OUTPUT
           cat <<EOF >> $GITHUB_STEP_SUMMARY
-          ### 🛡️ Bump Gate
+          ### 🛡️ Prod Gate
           - **Status**: Approved
           EOF
-      - run: echo "Bump Gate - Approved"
+      - run: echo "Prod Gate - Approved"
 
   bump:
     name: 🚀 Bump Version (Prod)
