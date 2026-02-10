@@ -3,6 +3,7 @@ import generateRcloneParams, { generateRcloneParamsStrings } from "./generateRcl
 import { timeHumanReadable } from "./timeHumanReadable.js";
 import { determineBinaryAbsolutePath } from "./determineBinaryAbsolutePath.js";
 import { escapeFilePath } from "./escapeFilePath.js";
+import { LogBufferer } from "./LogBufferer.js";
 
 import type { MainTypes, DriveCompressionOptions } from "./commonTypes.js";
 
@@ -11,6 +12,52 @@ import type { MainTypes, DriveCompressionOptions } from "./commonTypes.js";
  */
 export default async function driveCompression(options: DriveCompressionOptions) {
   const { source, target, progressEvent, log, end } = options;
+  const logBufferer = new LogBufferer(log);
+
+  /**
+   * Internal state to avoid duplicate progress events if needed,
+   * although rclone with 1s stats interval is fine.
+   */
+  let lastPercent = "";
+  function processOneLog(line: string) {
+    // Parse progress from rclone aggregate stats line
+    // Example: 299.147 MiB / 662.034 MiB, 45%, 0 B/s, ETA - (xfr#8137/18149)
+    // We look for a line that starts with counts (e.g. "1.2 MiB / 10 MiB, 12%")
+    const match = line.match(/^\d*.\d* [^\s]+ \/ \d*.\d* [^\s]+, (\d+)%, \d+.*$/);
+    if (match && match[1]) {
+      // Trigger progressEvent only if the percentage changed
+      if (match[1] !== lastPercent) {
+        lastPercent = match[1];
+
+        const progressPercentNum = parseInt(match[1], 10);
+
+        const now = Date.now();
+        const totalTimePassedMs = now - startTime;
+
+        let estimatedRemainingTimeMs = 0;
+        let estimatedTotalTimeMs = 0;
+
+        if (progressPercentNum > 0) {
+          const totalMs = (totalTimePassedMs / progressPercentNum) * 100;
+          estimatedTotalTimeMs = Math.round(totalMs);
+          estimatedRemainingTimeMs = Math.round(totalMs - totalTimePassedMs);
+        }
+
+        if (progressEvent) {
+          progressEvent({
+            progressPercentHuman: `${match[1]}%`,
+            totalTimePassedHuman: timeHumanReadable(totalTimePassedMs),
+            estimatedTotalTimeHuman: progressPercentNum > 0 ? timeHumanReadable(estimatedTotalTimeMs) : "?",
+            estimatedRemainingTimeHuman: progressPercentNum > 0 ? timeHumanReadable(estimatedRemainingTimeMs) : "?",
+          });
+        }
+      }
+    }
+  }
+
+  logBufferer.setLastLinesCallback((lines) => {
+    lines.forEach((l) => processOneLog(l));
+  });
 
   let mainExec;
   let action, flags, sourcePath, destPath;
@@ -33,27 +80,18 @@ export default async function driveCompression(options: DriveCompressionOptions)
 
   return new Promise<void>((resolve) => {
     try {
-      /**
-       * Internal state to avoid duplicate progress events if needed,
-       * although rclone with 1s stats interval is fine.
-       */
-      let lastPercent = "";
-
       const child = spawn(mainExec, args);
 
       let stdoutRemainder = "";
       let stderrRemainder = "";
 
-      if (log) {
-        log(
-          `${escapeFilePath(mainExec)} ${generateRcloneParamsStrings({
-            source,
-            target,
-            delete: options.delete ?? false,
-          })}
-`,
-        );
-      }
+      logBufferer.collect(
+        `${escapeFilePath(mainExec)} ${generateRcloneParamsStrings({
+          source,
+          target,
+          delete: options.delete ?? false,
+        })}`,
+      );
 
       const handleData = (data: Buffer, isStdout: boolean) => {
         const text = (isStdout ? stdoutRemainder : stderrRemainder) + data.toString();
@@ -69,44 +107,7 @@ export default async function driveCompression(options: DriveCompressionOptions)
         for (const line of lines) {
           if (!line.trim()) continue;
 
-          if (log) {
-            log(line);
-          }
-
-          // Parse progress from rclone aggregate stats line
-          // Example: 299.147 MiB / 662.034 MiB, 45%, 0 B/s, ETA - (xfr#8137/18149)
-          // We look for a line that starts with counts (e.g. "1.2 MiB / 10 MiB, 12%")
-          const match = line.match(/^\d*.\d* [^\s]+ \/ \d*.\d* [^\s]+, (\d+)%, \d+.*$/);
-          if (match && match[1]) {
-            // Trigger progressEvent only if the percentage changed
-            if (match[1] !== lastPercent) {
-              lastPercent = match[1];
-
-              const progressPercentNum = parseInt(match[1], 10);
-
-              const now = Date.now();
-              const totalTimePassedMs = now - startTime;
-
-              let estimatedRemainingTimeMs = 0;
-              let estimatedTotalTimeMs = 0;
-
-              if (progressPercentNum > 0) {
-                const totalMs = (totalTimePassedMs / progressPercentNum) * 100;
-                estimatedTotalTimeMs = Math.round(totalMs);
-                estimatedRemainingTimeMs = Math.round(totalMs - totalTimePassedMs);
-              }
-
-              if (progressEvent) {
-                progressEvent({
-                  progressPercentHuman: `${match[1]}%`,
-                  totalTimePassedHuman: timeHumanReadable(totalTimePassedMs),
-                  estimatedTotalTimeHuman: progressPercentNum > 0 ? timeHumanReadable(estimatedTotalTimeMs) : "?",
-                  estimatedRemainingTimeHuman:
-                    progressPercentNum > 0 ? timeHumanReadable(estimatedRemainingTimeMs) : "?",
-                });
-              }
-            }
-          }
+          logBufferer.collect(line);
         }
       };
 
@@ -114,6 +115,7 @@ export default async function driveCompression(options: DriveCompressionOptions)
       child.stderr.on("data", (data) => handleData(data, false));
 
       child.on("error", (err) => {
+        logBufferer.flush();
         const duration = timeHumanReadable(Date.now() - startTime);
         end(err.message, duration);
         resolve();
@@ -121,8 +123,10 @@ export default async function driveCompression(options: DriveCompressionOptions)
 
       child.on("close", (code) => {
         // Process remaining content if any
-        if (stdoutRemainder && log) log(stdoutRemainder);
-        if (stderrRemainder && log) log("[stderr] " + stderrRemainder);
+        if (stdoutRemainder) logBufferer.collect(stdoutRemainder);
+        if (stderrRemainder) logBufferer.collect("[stderr] " + stderrRemainder);
+
+        logBufferer.flush();
 
         const duration = timeHumanReadable(Date.now() - startTime);
         if (code === 0) {
@@ -134,6 +138,7 @@ export default async function driveCompression(options: DriveCompressionOptions)
         resolve();
       });
     } catch (e: any) {
+      logBufferer.flush();
       end(e.message, "0.0s");
       resolve();
     }
