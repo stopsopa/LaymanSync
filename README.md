@@ -28,34 +28,6 @@ Once app was doing good enough job and was handling errors properly I don't see 
 
 So here it is. I hope you find it useful.
 
-## Developer Methodology
-
-This project uses **[Semantic Release](https://semantic-release.gitbook.io/)** following the **[Conventional Commits](https://www.conventionalcommits.org/)** standard. This means releases and versioning are automatically managed based on commit messages.
-
-### Commit Types
-
-- `fix:` -> triggers a **PATCH** release (e.g., `1.0.0` -> `1.0.1`)
-- `feat:` -> triggers a **MINOR** release (e.g., `1.0.0` -> `1.1.0`)
-- `BREAKING CHANGE:` or `!` -> triggers a **MAJOR** release (e.g., `1.0.0` -> `2.0.0`)
-
-### How to trigger a Major Version?
-
-To trigger a **MAJOR** release, you must include a breaking change indicator.
-
-**Example 1 (Footer):**
-
-```text
-feat: redesign the plugin system
-
-BREAKING CHANGE: The architecture has changed, and old plugins are no longer compatible.
-```
-
-**Example 2 (Exclamation Mark):**
-
-```text
-feat!: remove support for legacy configuration files
-```
-
 ---
 
 There is [alternative branch](https://github.com/stopsopa/LaymanSync/tree/gemini3flash) where UI was build with Gemini 3 Flash (non-thinking) via Antigravity - It's also usable but for no real reason honestly I've picked implementation with Claude 4.5 Sonnet. None of these were any better in any significant way.
@@ -95,6 +67,34 @@ Select file:
 from [Releases](https://github.com/stopsopa/LaymanSync/releases) page.
 
 Then follow [MACOS_SECURITY](MACOS_SECURITY.md) file for further instructions.
+
+## Developer Methodology
+
+This project uses **[Semantic Release](https://semantic-release.gitbook.io/)** following the **[Conventional Commits](https://www.conventionalcommits.org/)** standard. This means releases and versioning are automatically managed based on commit messages.
+
+### Commit Types
+
+- `fix:` -> triggers a **PATCH** release (e.g., `1.0.0` -> `1.0.1`)
+- `feat:` -> triggers a **MINOR** release (e.g., `1.0.0` -> `1.1.0`)
+- `BREAKING CHANGE:` or `!` -> triggers a **MAJOR** release (e.g., `1.0.0` -> `2.0.0`)
+
+### How to trigger a Major Version?
+
+To trigger a **MAJOR** release, you must include a breaking change indicator.
+
+**Example 1 (Footer):**
+
+```text
+feat: redesign the plugin system
+
+BREAKING CHANGE: The architecture has changed, and old plugins are no longer compatible.
+```
+
+**Example 2 (Exclamation Mark):**
+
+```text
+feat!: remove support for legacy configuration files
+```
 
 ## License
 
