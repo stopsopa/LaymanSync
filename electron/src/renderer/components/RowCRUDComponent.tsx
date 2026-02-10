@@ -21,6 +21,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
   const [isLogsExpanded, setIsLogsExpanded] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLPreElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll logs to bottom
   useEffect(() => {
@@ -31,6 +32,14 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
 
   const handleDragStart = (e: React.DragEvent) => {
     if (isSyncing) return;
+
+    // Set the entire card as the drag image even though we only drag by the handle
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      // Calculate where the cursor is relative to the card to keep it positioned properly
+      e.dataTransfer.setDragImage(cardRef.current, e.clientX - rect.left, e.clientY - rect.top);
+    }
+
     e.dataTransfer.setData("drag-index", index.toString());
     e.dataTransfer.effectAllowed = "move";
   };
@@ -108,9 +117,8 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
 
   return (
     <div
+      ref={cardRef}
       className={`config-item-card ${isDraggingOver ? "dragging-over" : ""}`}
-      draggable={!isSyncing}
-      onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -141,6 +149,8 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
       <div style={{ display: "flex", gap: "10px", alignItems: "stretch" }}>
         {/* DRAG HANDLE */}
         <div
+          draggable={!isSyncing}
+          onDragStart={handleDragStart}
           style={{
             width: "20px",
             display: "flex",
