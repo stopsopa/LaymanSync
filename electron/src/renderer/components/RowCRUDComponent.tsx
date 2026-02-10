@@ -247,15 +247,16 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
       </div>
 
       {/* FOURTH ROW: PROGRESS BAR & REMOVE */}
-      <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <div
           style={{
             flex: 1,
-            height: "12px",
+            height: "36px",
             background: "rgba(0,0,0,0.05)",
-            borderRadius: "6px",
+            borderRadius: "8px",
             overflow: "hidden",
             position: "relative",
+            border: "1px solid rgba(0,0,0,0.03)",
           }}
         >
           <div
@@ -263,7 +264,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               width: "0%",
               height: "100%",
               background: "linear-gradient(90deg, #0073bb, #00a1c9)",
-              borderRadius: "6px",
+              borderRadius: "8px",
               transition: "width 0.5s ease",
             }}
           />
@@ -273,32 +274,52 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              fontSize: "0.6rem",
-              color: "#666",
-              fontWeight: "bold",
+              fontSize: "0.75rem",
+              color: "#555",
+              fontWeight: "700",
+              textTransform: "uppercase",
+              letterSpacing: "0.8px",
             }}
           >
-            IDLE
+            WAITING IN QUEUE
           </span>
         </div>
-        <div style={{ width: "120px", display: "flex", justifyContent: "flex-end" }}>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="aws-button"
-            style={{
-              backgroundColor: "transparent",
-              color: "#d32f2f",
-              border: "1px solid rgba(211, 47, 47, 0.4)",
-              padding: "6px 16px",
-              fontSize: "0.85rem",
-              borderRadius: "8px",
-              transition: "all 0.2s ease",
-            }}
-            title="Remove this entry"
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="aws-button"
+          style={{
+            width: "36px",
+            height: "36px",
+            minWidth: "36px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "transparent",
+            color: "#d32f2f",
+            border: "1px solid rgba(211, 47, 47, 0.4)",
+            padding: "0",
+            borderRadius: "8px",
+            transition: "all 0.2s ease",
+            flexShrink: 0,
+          }}
+          title="Remove this entry"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            Remove Row
-          </button>
-        </div>
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </button>
       </div>
 
       {isModalOpen && (

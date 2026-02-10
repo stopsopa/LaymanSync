@@ -16,7 +16,7 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
       target: "",
       delete: false,
     };
-    setConfig([...data, newItem]);
+    setConfig([newItem, ...data]);
   };
 
   const handleRemoveItem = (index: number) => {
