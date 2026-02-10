@@ -50,7 +50,8 @@ export default async function driveCompression(options: DriveCompressionOptions)
             source,
             target,
             delete: options.delete ?? false,
-          })}`,
+          })}
+`,
         );
       }
 

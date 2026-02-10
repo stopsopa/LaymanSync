@@ -133,9 +133,9 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
   };
 
   const getProgressColor = () => {
-    if (state?.status === "done") return "#4caf50";
-    if (state?.status === "error") return "#ff1744"; // Brighter, more vibrant red
-    return "linear-gradient(90deg, #0073bb, #00a1c9)";
+    if (state?.status === "done") return "var(--aws-green)";
+    if (state?.status === "error") return "var(--aws-red)";
+    return "var(--aws-blue)";
   };
 
   const renderExistenceIcon = (exists: boolean | undefined, path: string | undefined) => {
@@ -465,14 +465,17 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
           style={{
             flex: 1,
             height: "28px",
-            background: state?.status === "error" ? "rgba(255, 23, 68, 0.1)" : "rgba(0,0,0,0.04)",
-            borderRadius: "6px",
+            background: state?.status === "error" ? "rgba(209, 50, 18, 0.15)" : "#eaeded",
+            borderRadius: "4px",
             overflow: "hidden",
             position: "relative",
             border: `1px solid ${
-              state?.status === "error" ? "#ff1744" : state?.status === "running" ? "#0073bb" : "rgba(0,0,0,0.02)"
+              state?.status === "error"
+                ? "var(--aws-red)"
+                : state?.status === "running"
+                  ? "var(--aws-blue)"
+                  : "var(--aws-border)"
             }`,
-            boxShadow: state?.status === "error" ? "inset 0 0 10px rgba(255, 23, 68, 0.1)" : "none",
           }}
         >
           <div
@@ -480,7 +483,6 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
               width: state?.status === "error" ? "100%" : progressPercent,
               height: "100%",
               background: getProgressColor(),
-              borderRadius: "6px",
               transition: "width 0.5s ease, background 0.3s ease",
             }}
           />
@@ -490,18 +492,14 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              fontSize: "0.65rem",
-              color:
-                state?.status === "running" || state?.status === "done" || state?.status === "error" ? "#fff" : "#555",
-              fontWeight: "900", // Extra bold for better visibility
+              fontSize: "0.75rem",
+              color: "#ffffff",
+              fontWeight: "800",
               textTransform: "uppercase",
               letterSpacing: "1px",
-              textShadow:
-                state?.status === "error"
-                  ? "0 1px 4px rgba(0,0,0,0.6)" // Stronger shadow for error
-                  : state?.status === "running" || state?.status === "done"
-                    ? "0 1px 2px rgba(0,0,0,0.3)"
-                    : "none",
+              // text-shadow ensures visibility on both bright and dark backgrounds
+              textShadow: "0px 0px 4px rgba(0, 0, 0, 0.8), 0px 1px 2px rgba(0, 0, 0, 0.9)",
+              whiteSpace: "nowrap",
             }}
           >
             {statusLabel()}
