@@ -6,6 +6,7 @@ type LogicComponentProps = {
   isSyncing: boolean;
   isFinished: boolean;
   rowStates: Record<number, RowState>;
+  dirExistence: Record<number, { source: boolean; target: boolean }>;
   onStart: () => void;
   onReset: () => void;
 };
@@ -13,7 +14,15 @@ type LogicComponentProps = {
 import { useConfigManager } from "../tools/ConfigManager";
 import RowCRUDComponent from "./RowCRUDComponent";
 
-const LogicComponent: FC<LogicComponentProps> = ({ toConfig, isSyncing, isFinished, rowStates, onStart, onReset }) => {
+const LogicComponent: FC<LogicComponentProps> = ({
+  toConfig,
+  isSyncing,
+  isFinished,
+  rowStates,
+  dirExistence,
+  onStart,
+  onReset,
+}) => {
   const { path, data, setConfig } = useConfigManager();
 
   const handleAddItem = () => {
@@ -96,6 +105,7 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig, isSyncing, isFinish
               onMove={handleMoveItem}
               isSyncing={isSyncing}
               state={rowStates[index]}
+              dirExistence={dirExistence[index]}
             />
           ))
         )}

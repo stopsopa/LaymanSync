@@ -118,6 +118,17 @@ ipcMain.handle("dialog:saveFile", async (_event, options?: Electron.SaveDialogOp
   return result.filePath;
 });
 
+// Check if directory exists (supports symlinks to directories)
+ipcMain.handle("file:exists", (_event, filePath: string) => {
+  if (!filePath) return false;
+  try {
+    const stats = fs.statSync(filePath);
+    return stats.isDirectory();
+  } catch (e) {
+    return false;
+  }
+});
+
 // Get rclone version
 ipcMain.handle("app:getRcloneVersion", async () => {
   try {

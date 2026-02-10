@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import "./Wizard.css";
 import ConfigComponent from "./ConfigComponent";
 import LogicComponent from "./LogicComponent";
@@ -24,6 +24,25 @@ function Wizard() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [rowStates, setRowStates] = useState<Record<number, RowState>>({});
+  const [dirExistence, setDirExistence] = useState<Record<number, { source: boolean; target: boolean }>>({});
+
+  const validateDirectories = useCallback(async () => {
+    const results: Record<number, { source: boolean; target: boolean }> = {};
+    const api = window.electronAPI as any;
+    for (let i = 0; i < config.length; i++) {
+      const item = config[i] as MainTypes;
+      results[i] = {
+        source: item.source ? await api.checkPathExists(item.source) : false,
+        target: item.target ? await api.checkPathExists(item.target) : false,
+      };
+    }
+    setDirExistence(results);
+  }, [config]);
+
+  // Validate on mount and whenever config changes (this covers "Add New Entry" and editing)
+  useEffect(() => {
+    validateDirectories();
+  }, [config, validateDirectories]);
 
   function selectLogicView() {
     if (configFile) {
@@ -33,6 +52,9 @@ function Wizard() {
 
   const startSync = async () => {
     if (isSyncing) return;
+
+    // Validate directories before starting
+    await validateDirectories();
 
     setIsSyncing(true);
     setIsFinished(false);
@@ -98,6 +120,7 @@ function Wizard() {
   const resetSync = () => {
     setRowStates({});
     setIsFinished(false);
+    validateDirectories();
   };
 
   return (
@@ -145,6 +168,7 @@ function Wizard() {
               isSyncing={isSyncing}
               isFinished={isFinished}
               rowStates={rowStates}
+              dirExistence={dirExistence}
               onStart={startSync}
               onReset={resetSync}
             />

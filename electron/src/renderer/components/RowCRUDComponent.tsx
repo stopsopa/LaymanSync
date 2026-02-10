@@ -13,12 +13,23 @@ interface RowCRUDComponentProps {
   onMove: (dragIndex: number, hoverIndex: number) => void;
   isSyncing: boolean;
   state?: RowState;
+  dirExistence?: { source: boolean; target: boolean };
 }
 
-const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, onRemove, onMove, isSyncing, state }) => {
+const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
+  item,
+  index,
+  onUpdate,
+  onRemove,
+  onMove,
+  isSyncing,
+  state,
+  dirExistence,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isLogsExpanded, setIsLogsExpanded] = useState(false);
+  const [popoverContent, setPopoverContent] = useState<React.ReactNode>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLPreElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -77,8 +88,9 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
     }
   };
 
-  const showPopover = (e: React.MouseEvent) => {
+  const showPopover = (e: React.MouseEvent, content: React.ReactNode) => {
     if (popoverRef.current && "showPopover" in popoverRef.current) {
+      setPopoverContent(content);
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const popover = popoverRef.current;
 
@@ -97,6 +109,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
   const hidePopover = () => {
     if (popoverRef.current && popoverRef.current.hidePopover) {
       popoverRef.current.hidePopover();
+      setPopoverContent(null);
     }
   };
 
@@ -123,6 +136,56 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
     if (state?.status === "done") return "#4caf50";
     if (state?.status === "error") return "#ff1744"; // Brighter, more vibrant red
     return "linear-gradient(90deg, #0073bb, #00a1c9)";
+  };
+
+  const renderExistenceIcon = (exists: boolean | undefined, path: string | undefined) => {
+    if (!path) return null;
+    const content = exists ? "Directory exists" : "Directory does not exist";
+    const color = exists ? "#4caf50" : "#ff1744";
+
+    return (
+      <div
+        onMouseEnter={(e) =>
+          showPopover(
+            e,
+            <span>
+              <strong>Status:</strong> {content}
+            </span>,
+          )
+        }
+        onMouseLeave={hidePopover}
+        style={{ color, display: "flex", alignItems: "center", padding: "0 4px", cursor: "help" }}
+      >
+        {exists ? (
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        ) : (
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -223,9 +286,12 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {item.source || "Select source directory..."}
+                  {item.source || "Select source directory (click or drag & drop)..."}
                 </div>
               </DropzoneDirectory>
+            </div>
+            <div style={{ marginTop: "16px", alignSelf: "center" }}>
+              {renderExistenceIcon(dirExistence?.source, item.source)}
             </div>
             <button
               onClick={handleRevealSource}
@@ -283,9 +349,12 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {item.target || "Select destination directory..."}
+                  {item.target || "Select destination directory (click or drag & drop)..."}
                 </div>
               </DropzoneDirectory>
+            </div>
+            <div style={{ marginTop: "16px", alignSelf: "center" }}>
+              {renderExistenceIcon(dirExistence?.target, item.target)}
             </div>
             <button
               onClick={handleRevealTarget}
@@ -310,7 +379,15 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
       {/* THIRD ROW: DELETE FLAG */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "8px 0" }}>
         <div
-          onMouseEnter={(e) => showPopover(e)}
+          onMouseEnter={(e) =>
+            showPopover(
+              e,
+              <>
+                <strong>Warning:</strong> This flag will delete files in the destination that do not exist in the
+                source. Use with caution!
+              </>,
+            )
+          }
           onMouseLeave={hidePopover}
           style={{ display: "flex", alignItems: "center", gap: "8px" }}
         >
@@ -371,10 +448,10 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
             pointerEvents: "none",
             left: "-9999px", // Start offscreen
             top: "-9999px",
+            zIndex: 9999,
           }}
         >
-          <strong>Warning:</strong> This flag will delete files in the destination that do not exist in the source. Use
-          with caution!
+          {popoverContent}
         </div>
       </div>
 

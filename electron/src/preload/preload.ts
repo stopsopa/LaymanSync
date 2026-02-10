@@ -28,6 +28,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Open native save file dialog
   saveFile: (options?: Electron.SaveDialogOptions) => ipcRenderer.invoke("dialog:saveFile", options),
 
+  // Check if path exists
+  checkPathExists: (path: string) => ipcRenderer.invoke("file:exists", path),
+
   // Start sync/copy operation
   startSync: (options: { source: string; target: string; deleteMode: boolean; index: number }) =>
     ipcRenderer.send("sync:start", options),
@@ -54,7 +57,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 });
 
-// Type definition for window.electronAPI
 declare global {
   interface Window {
     electronAPI: {
@@ -67,6 +69,7 @@ declare global {
       openDirectory: () => Promise<string | null>;
       openFile: (filters?: Electron.FileFilter[]) => Promise<string | null>;
       saveFile: (options?: Electron.SaveDialogOptions) => Promise<string | null>;
+      checkPathExists: (path: string) => Promise<boolean>;
       startSync: (options: { source: string; target: string; deleteMode: boolean; index: number }) => void;
       onSyncProgress: (callback: (data: { index: number; data: any }) => void) => () => void;
       onSyncLog: (callback: (data: { index: number; line: string }) => void) => () => void;
