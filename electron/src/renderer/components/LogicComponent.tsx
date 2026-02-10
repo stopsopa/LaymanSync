@@ -84,23 +84,36 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
         )}
       </div>
 
-      <div style={{ marginTop: "40px", borderTop: "1px solid #eee", paddingTop: "20px" }}>
-        <h4 style={{ color: "#888", marginBottom: "10px", fontSize: "0.8rem", textTransform: "uppercase" }}>
-          Debug View (Raw Content)
-        </h4>
-        <pre
+      <div
+        style={{
+          marginTop: "30px",
+          borderTop: "1px solid #eee",
+          paddingTop: "20px",
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: "12px",
+          alignItems: "center",
+        }}
+      >
+        <button
+          className="aws-button aws-button-secondary"
+          disabled
           style={{
-            fontSize: "11px",
-            maxHeight: "150px",
-            overflow: "auto",
-            background: "#f4f4f4",
-            padding: "10px",
-            borderRadius: "4px",
-            border: "1px solid #ddd",
+            minWidth: "100px",
+            opacity: 0.5,
           }}
         >
-          {JSON.stringify(data, null, 2)}
-        </pre>
+          Reset
+        </button>
+        <button
+          className="aws-button aws-button-primary"
+          style={{
+            minWidth: "140px",
+            padding: "10px 24px",
+          }}
+        >
+          Start Sync
+        </button>
       </div>
     </div>
   );
