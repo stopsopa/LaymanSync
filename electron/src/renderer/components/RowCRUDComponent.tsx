@@ -9,11 +9,37 @@ interface RowCRUDComponentProps {
   index: number;
   onUpdate: (index: number, updates: Partial<MainOptionalTypes>) => void;
   onRemove: (index: number) => void;
+  onMove: (dragIndex: number, hoverIndex: number) => void;
 }
 
-const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, onRemove }) => {
+const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, onRemove, onMove }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData("drag-index", index.toString());
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    const dragIndex = parseInt(e.dataTransfer.getData("drag-index"), 10);
+    if (dragIndex !== index) {
+      onMove(dragIndex, index);
+    }
+  };
 
   const handleRevealSource = () => {
     if (item.source) {
@@ -52,129 +78,169 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
 
   return (
     <div
-      className="config-item-card"
+      className={`config-item-card ${isDraggingOver ? "dragging-over" : ""}`}
+      draggable
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
       style={{
         background: "rgba(255, 255, 255, 0.9)",
         backdropFilter: "blur(10px)",
-        padding: "20px",
-        borderRadius: "16px",
-        border: "1px solid rgba(224, 224, 224, 0.5)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.05)",
+        padding: "10px 15px",
+        borderRadius: "12px",
+        border: `1px solid ${isDraggingOver ? "#0073bb" : "rgba(224, 224, 224, 0.5)"}`,
+        boxShadow: "0 4px 16px rgba(0, 0, 0, 0.05)",
         display: "flex",
         flexDirection: "column",
-        gap: "12px",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-        marginBottom: "15px",
+        gap: "6px",
+        transition: "all 0.2s ease",
+        position: "relative",
       }}
     >
-      {/* FIRST ROW: SOURCE */}
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              fontSize: "0.75rem",
-              fontWeight: "600",
-              color: "#666",
-              marginBottom: "4px",
-              display: "block",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-            }}
-          >
-            Source Directory
-          </label>
-          <DropzoneDirectory
-            onChange={(path) => onUpdate(index, { source: path })}
-            style={{
-              minHeight: "45px",
-              padding: "5px 15px",
-              fontSize: "0.9rem",
-              borderRadius: "10px",
-              background: "rgba(0,0,0,0.02)",
-              border: "1px dashed rgba(0,0,0,0.1)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.9rem",
-                color: item.source ? "#333" : "#999",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {item.source || "Select source directory..."}
-            </div>
-          </DropzoneDirectory>
-        </div>
-        <button
-          onClick={handleRevealSource}
-          disabled={!item.source}
-          className="aws-button aws-button-secondary"
+      <div style={{ display: "flex", gap: "10px", alignItems: "stretch" }}>
+        {/* DRAG HANDLE */}
+        <div
           style={{
-            marginTop: "20px",
-            whiteSpace: "nowrap",
-            opacity: item.source ? 1 : 0.5,
-            cursor: item.source ? "pointer" : "not-allowed",
+            width: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "grab",
+            color: "#ccc",
+            background: "rgba(0,0,0,0.02)",
+            borderRadius: "6px",
+            border: "1px solid rgba(0,0,0,0.03)",
           }}
+          title="Drag to reorder"
         >
-          Reveal in Finder
-        </button>
-      </div>
+          <svg width="12" height="20" viewBox="0 0 12 20" fill="currentColor">
+            <circle cx="2" cy="2" r="1.5" />
+            <circle cx="2" cy="8" r="1.5" />
+            <circle cx="2" cy="14" r="1.5" />
+            <circle cx="10" cy="2" r="1.5" />
+            <circle cx="10" cy="8" r="1.5" />
+            <circle cx="10" cy="14" r="1.5" />
+          </svg>
+        </div>
 
-      {/* SECOND ROW: DESTINATION */}
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              fontSize: "0.75rem",
-              fontWeight: "600",
-              color: "#666",
-              marginBottom: "4px",
-              display: "block",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-            }}
-          >
-            Destination Directory
-          </label>
-          <DropzoneDirectory
-            onChange={(path) => onUpdate(index, { target: path })}
-            style={{
-              minHeight: "45px",
-              padding: "5px 15px",
-              fontSize: "0.9rem",
-              borderRadius: "10px",
-              background: "rgba(0,0,0,0.02)",
-              border: "1px dashed rgba(0,0,0,0.1)",
-            }}
-          >
-            <div
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+          {/* FIRST ROW: SOURCE */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  fontSize: "0.65rem",
+                  fontWeight: "600",
+                  color: "#666",
+                  marginBottom: "2px",
+                  display: "block",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Source Directory
+              </label>
+              <DropzoneDirectory
+                onChange={(path) => onUpdate(index, { source: path })}
+                style={{
+                  minHeight: "34px",
+                  padding: "2px 12px",
+                  fontSize: "0.85rem",
+                  borderRadius: "8px",
+                  background: "rgba(0,0,0,0.02)",
+                  border: "1px dashed rgba(0,0,0,0.1)",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.8rem",
+                    color: item.source ? "#333" : "#999",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {item.source || "Select source directory..."}
+                </div>
+              </DropzoneDirectory>
+            </div>
+            <button
+              onClick={handleRevealSource}
+              disabled={!item.source}
+              className="aws-button aws-button-secondary"
               style={{
-                fontSize: "0.9rem",
-                color: item.target ? "#333" : "#999",
+                marginTop: "16px",
                 whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                opacity: item.source ? 1 : 0.5,
+                cursor: item.source ? "pointer" : "not-allowed",
+                padding: "4px 10px",
+                fontSize: "0.75rem",
+                height: "34px",
               }}
             >
-              {item.target || "Select destination directory..."}
+              Reveal in Finder
+            </button>
+          </div>
+
+          {/* SECOND ROW: DESTINATION */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  fontSize: "0.65rem",
+                  fontWeight: "600",
+                  color: "#666",
+                  marginBottom: "2px",
+                  display: "block",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Destination Directory
+              </label>
+              <DropzoneDirectory
+                onChange={(path) => onUpdate(index, { target: path })}
+                style={{
+                  minHeight: "34px",
+                  padding: "2px 12px",
+                  fontSize: "0.85rem",
+                  borderRadius: "8px",
+                  background: "rgba(0,0,0,0.02)",
+                  border: "1px dashed rgba(0,0,0,0.1)",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.8rem",
+                    color: item.target ? "#333" : "#999",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {item.target || "Select destination directory..."}
+                </div>
+              </DropzoneDirectory>
             </div>
-          </DropzoneDirectory>
+            <button
+              onClick={handleRevealTarget}
+              disabled={!item.target}
+              className="aws-button aws-button-secondary"
+              style={{
+                marginTop: "16px",
+                whiteSpace: "nowrap",
+                opacity: item.target ? 1 : 0.5,
+                cursor: item.target ? "pointer" : "not-allowed",
+                padding: "4px 10px",
+                fontSize: "0.75rem",
+                height: "34px",
+              }}
+            >
+              Reveal in Finder
+            </button>
+          </div>
         </div>
-        <button
-          onClick={handleRevealTarget}
-          disabled={!item.target}
-          className="aws-button aws-button-secondary"
-          style={{
-            marginTop: "20px",
-            whiteSpace: "nowrap",
-            opacity: item.target ? 1 : 0.5,
-            cursor: item.target ? "pointer" : "not-allowed",
-          }}
-        >
-          Reveal in Finder
-        </button>
       </div>
 
       {/* THIRD ROW: DELETE FLAG */}
@@ -189,10 +255,10 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              padding: "8px 16px",
-              borderRadius: "12px",
-              background: item.delete ? "rgba(211, 47, 47, 0.1)" : "transparent",
-              border: `1px solid ${item.delete ? "rgba(211, 47, 47, 0.3)" : "rgba(0,0,0,0.05)"}`,
+              padding: "4px 12px",
+              borderRadius: "8px",
+              background: item.delete ? "rgba(211, 47, 47, 0.08)" : "transparent",
+              border: `1px solid ${item.delete ? "rgba(211, 47, 47, 0.25)" : "rgba(0,0,0,0.04)"}`,
               transition: "all 0.3s ease",
               cursor: "pointer",
             }}
@@ -204,15 +270,15 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               onChange={(e) => onUpdate(index, { delete: e.target.checked })}
               onClick={(e) => e.stopPropagation()}
               style={{
-                width: "20px",
-                height: "20px",
+                width: "16px",
+                height: "16px",
                 accentColor: "#d32f2f",
                 cursor: "pointer",
               }}
             />
             <span
               style={{
-                fontSize: "0.95rem",
+                fontSize: "0.85rem",
                 fontWeight: "500",
                 color: item.delete ? "#d32f2f" : "#444",
               }}
@@ -251,12 +317,12 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
         <div
           style={{
             flex: 1,
-            height: "36px",
-            background: "rgba(0,0,0,0.05)",
-            borderRadius: "8px",
+            height: "28px",
+            background: "rgba(0,0,0,0.04)",
+            borderRadius: "6px",
             overflow: "hidden",
             position: "relative",
-            border: "1px solid rgba(0,0,0,0.03)",
+            border: "1px solid rgba(0,0,0,0.02)",
           }}
         >
           <div
@@ -264,7 +330,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               width: "0%",
               height: "100%",
               background: "linear-gradient(90deg, #0073bb, #00a1c9)",
-              borderRadius: "8px",
+              borderRadius: "6px",
               transition: "width 0.5s ease",
             }}
           />
@@ -274,7 +340,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              fontSize: "0.75rem",
+              fontSize: "0.65rem",
               color: "#555",
               fontWeight: "700",
               textTransform: "uppercase",
@@ -288,9 +354,9 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
           onClick={() => setIsModalOpen(true)}
           className="aws-button"
           style={{
-            width: "36px",
-            height: "36px",
-            minWidth: "36px",
+            width: "28px",
+            height: "28px",
+            minWidth: "28px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -298,19 +364,19 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
             color: "#d32f2f",
             border: "1px solid rgba(211, 47, 47, 0.4)",
             padding: "0",
-            borderRadius: "8px",
+            borderRadius: "6px",
             transition: "all 0.2s ease",
             flexShrink: 0,
           }}
           title="Remove this entry"
         >
           <svg
-            width="18"
-            height="18"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           >

@@ -30,6 +30,14 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
     setConfig(newData);
   };
 
+  const handleMoveItem = (dragIndex: number, hoverIndex: number) => {
+    const dragItem = data[dragIndex];
+    const newData = [...data];
+    newData.splice(dragIndex, 1);
+    newData.splice(hoverIndex, 0, dragItem);
+    setConfig(newData);
+  };
+
   return (
     <div className="wizard-step-content" style={{ padding: "20px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
@@ -48,7 +56,7 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
         </div>
       </div>
 
-      <div className="config-list-container" style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+      <div className="config-list-container" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         {data.length === 0 ? (
           <div
             style={{
@@ -70,6 +78,7 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
               index={index}
               onUpdate={handleUpdateItem}
               onRemove={handleRemoveItem}
+              onMove={handleMoveItem}
             />
           ))
         )}
