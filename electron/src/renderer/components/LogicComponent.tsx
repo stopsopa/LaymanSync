@@ -1,16 +1,23 @@
 import type { FC } from "react";
+import type { RowState } from "./Wizard";
 
 type LogicComponentProps = {
   toConfig: () => void;
+  isSyncing: boolean;
+  isFinished: boolean;
+  rowStates: Record<number, RowState>;
+  onStart: () => void;
+  onReset: () => void;
 };
 
 import { useConfigManager } from "../tools/ConfigManager";
 import RowCRUDComponent from "./RowCRUDComponent";
 
-const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
+const LogicComponent: FC<LogicComponentProps> = ({ toConfig, isSyncing, isFinished, rowStates, onStart, onReset }) => {
   const { path, data, setConfig } = useConfigManager();
 
   const handleAddItem = () => {
+    if (isSyncing) return;
     const newItem = {
       source: "",
       target: "",
@@ -20,17 +27,20 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
   };
 
   const handleRemoveItem = (index: number) => {
+    if (isSyncing) return;
     const newData = data.filter((_, i) => i !== index);
     setConfig(newData);
   };
 
   const handleUpdateItem = (index: number, updates: any) => {
+    if (isSyncing) return;
     const newData = [...data];
     newData[index] = { ...newData[index], ...updates };
     setConfig(newData);
   };
 
   const handleMoveItem = (dragIndex: number, hoverIndex: number) => {
+    if (isSyncing) return;
     const dragItem = data[dragIndex];
     const newData = [...data];
     newData.splice(dragIndex, 1);
@@ -50,7 +60,12 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
           </p>
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={handleAddItem} className="aws-button aws-button-primary">
+          <button
+            onClick={handleAddItem}
+            className="aws-button aws-button-primary"
+            disabled={isSyncing}
+            style={{ opacity: isSyncing ? 0.6 : 1, cursor: isSyncing ? "not-allowed" : "pointer" }}
+          >
             + Add New Entry
           </button>
         </div>
@@ -79,6 +94,8 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
               onUpdate={handleUpdateItem}
               onRemove={handleRemoveItem}
               onMove={handleMoveItem}
+              isSyncing={isSyncing}
+              state={rowStates[index]}
             />
           ))
         )}
@@ -97,22 +114,28 @@ const LogicComponent: FC<LogicComponentProps> = ({ toConfig }) => {
       >
         <button
           className="aws-button aws-button-secondary"
-          disabled
+          onClick={onReset}
+          disabled={!isFinished || isSyncing}
           style={{
             minWidth: "100px",
-            opacity: 0.5,
+            opacity: !isFinished || isSyncing ? 0.5 : 1,
+            cursor: !isFinished || isSyncing ? "not-allowed" : "pointer",
           }}
         >
           Reset
         </button>
         <button
           className="aws-button aws-button-primary"
+          onClick={onStart}
+          disabled={isSyncing || data.length === 0}
           style={{
             minWidth: "140px",
             padding: "10px 24px",
+            opacity: isSyncing || data.length === 0 ? 0.5 : 1,
+            cursor: isSyncing || data.length === 0 ? "not-allowed" : "pointer",
           }}
         >
-          Start Sync
+          {isSyncing ? "Syncing..." : "Start Sync"}
         </button>
       </div>
     </div>

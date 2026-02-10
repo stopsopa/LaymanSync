@@ -165,101 +165,106 @@ ipcMain.on("file:write-json-sync", (event, { filePath, data }: { filePath: strin
 });
 
 // Start sync/copy operation
-ipcMain.on("sync:start", async (event, options: { source: string; target: string; deleteMode: boolean }) => {
-  const accumulatedLogs: string[] = [];
+ipcMain.on(
+  "sync:start",
+  async (event, options: { source: string; target: string; deleteMode: boolean; index: number }) => {
+    const accumulatedLogs: string[] = [];
+    const index = options.index;
 
-  try {
-    const { default: driveCompression } = await import("../tools/driveCompression.js");
+    try {
+      const { default: driveCompression } = await import("../tools/driveCompression.js");
 
-    // Throttle progress updates to prevent UI freezing
-    let lastProgressSent = 0;
-    let lastProgressData: any = null;
-    const THROTTLE_MS = 300;
+      // Throttle progress updates to prevent UI freezing
+      let lastProgressSent = 0;
+      let lastProgressData: any = null;
+      const THROTTLE_MS = 300;
 
-    // Wrap driveCompression in a promise that rejects on failure
-    // so we can handle it in the catch block as requested.
-    await new Promise<void>((resolve, reject) => {
-      driveCompression({
-        source: options.source,
-        target: options.target,
-        delete: options.deleteMode,
-        progressEvent: (data) => {
-          const now = Date.now();
-          lastProgressData = data;
+      // Wrap driveCompression in a promise that rejects on failure
+      // so we can handle it in the catch block as requested.
+      await new Promise<void>((resolve, reject) => {
+        driveCompression({
+          source: options.source,
+          target: options.target,
+          delete: options.deleteMode,
+          progressEvent: (data) => {
+            const now = Date.now();
+            lastProgressData = data;
 
-          // Only send if enough time has passed since last update
-          if (now - lastProgressSent >= THROTTLE_MS) {
-            event.sender.send("sync:progress", data);
-            lastProgressSent = now;
-          }
-        },
-        log: (line) => {
-          accumulatedLogs.push(line);
-          event.sender.send("sync:log", line);
-        },
-        end: (error, duration) => {
-          // Send final progress update if there's one pending
-          if (lastProgressData && Date.now() - lastProgressSent >= THROTTLE_MS) {
-            event.sender.send("sync:progress", lastProgressData);
-          }
+            // Only send if enough time has passed since last update
+            if (now - lastProgressSent >= THROTTLE_MS) {
+              event.sender.send("sync:progress", { index, data });
+              lastProgressSent = now;
+            }
+          },
+          log: (line) => {
+            accumulatedLogs.push(line);
+            event.sender.send("sync:log", { index, line });
+          },
+          end: (error, duration) => {
+            // Send final progress update if there's one pending
+            if (lastProgressData && Date.now() - lastProgressSent >= THROTTLE_MS) {
+              event.sender.send("sync:progress", { index, data: lastProgressData });
+            }
 
-          if (error) {
-            reject({ error, duration });
-          } else {
-            event.sender.send("sync:end", { error: null, duration });
-            resolve();
-          }
-        },
+            if (error) {
+              reject({ error, duration });
+            } else {
+              event.sender.send("sync:end", { index, error: null, duration });
+              resolve();
+            }
+          },
+        });
       });
-    });
-  } catch (err: any) {
-    let errorMessage = "";
-    let duration = "0s";
+    } catch (err: any) {
+      let errorMessage = "";
+      let duration = "0s";
 
-    // Handle the custom error object from our Promise rejection
-    if (err && typeof err === "object" && "error" in err) {
-      errorMessage = err.error;
-      duration = err.duration;
-    } else {
-      errorMessage = err.message || String(err);
-    }
-
-    // Translation for Rclone exit code 7 (Fatal Error)
-    if (errorMessage.includes("exited with code 7")) {
-      const absSource = path.resolve(options.source);
-      const absDest = path.resolve(options.target);
-
-      const relativeToDest = path.relative(absDest, absSource);
-      const sourceInsideDest = !relativeToDest.startsWith("..") && !path.isAbsolute(relativeToDest);
-
-      const relativeToSource = path.relative(absSource, absDest);
-      const destInsideSource = !relativeToSource.startsWith("..") && !path.isAbsolute(relativeToSource);
-
-      let overlapReason = "";
-      if (absSource === absDest) {
-        overlapReason = "Source and destination are exactly the same directory.";
-      } else if (sourceInsideDest) {
-        overlapReason = "Source directory is INSIDE the destination directory.";
-      } else if (destInsideSource) {
-        overlapReason = "Destination directory is INSIDE the source directory.";
-      }
-
-      if (overlapReason) {
-        errorMessage = `Sync Failed: Path Overlap Detected\n\n${overlapReason}\n\nThis is a fatal error in rclone (Code 7) because it would cause an infinite recursive copying loop.\n\nSource: ${absSource}\nDestination: ${absDest}`;
+      // Handle the custom error object from our Promise rejection
+      if (err && typeof err === "object" && "error" in err) {
+        errorMessage = err.error;
+        duration = err.duration;
       } else {
-        errorMessage = `Sync Failed: Fatal Rclone Error (Code 7)\n\nThis usually indicates a fatal system error or an issue with the paths provided.`;
+        errorMessage = err.message || String(err);
       }
-    }
 
-    // Append log context for better debugging
-    if (accumulatedLogs.length > 0) {
-      errorMessage += `\n\nRecent Logs:\n${accumulatedLogs.slice(-10).join("\n")}`;
-    }
+      // Translation for Rclone exit code 7 (Fatal Error)
+      if (errorMessage.includes("exited with code 7")) {
+        const absSource = path.resolve(options.source);
+        const absDest = path.resolve(options.target);
 
-    console.error("Sync operation failed:", errorMessage);
-    event.sender.send("sync:end", {
-      error: errorMessage,
-      duration: duration,
-    });
-  }
-});
+        const relativeToDest = path.relative(absDest, absSource);
+        const sourceInsideDest = !relativeToDest.startsWith("..") && !path.isAbsolute(relativeToDest);
+
+        const relativeToSource = path.relative(absSource, absDest);
+        const destInsideSource = !relativeToSource.startsWith("..") && !path.isAbsolute(relativeToSource);
+
+        let overlapReason = "";
+        if (absSource === absDest) {
+          overlapReason = "Source and destination are exactly the same directory.";
+        } else if (sourceInsideDest) {
+          overlapReason = "Source directory is INSIDE the destination directory.";
+        } else if (destInsideSource) {
+          overlapReason = "Destination directory is INSIDE the source directory.";
+        }
+
+        if (overlapReason) {
+          errorMessage = `Sync Failed: Path Overlap Detected\n\n${overlapReason}\n\nThis is a fatal error in rclone (Code 7) because it would cause an infinite recursive copying loop.\n\nSource: ${absSource}\nDestination: ${absDest}`;
+        } else {
+          errorMessage = `Sync Failed: Fatal Rclone Error (Code 7)\n\nThis usually indicates a fatal system error or an issue with the paths provided.`;
+        }
+      }
+
+      // Append log context for better debugging
+      if (accumulatedLogs.length > 0) {
+        errorMessage += `\n\nRecent Logs:\n${accumulatedLogs.slice(-10).join("\n")}`;
+      }
+
+      console.error("Sync operation failed:", errorMessage);
+      event.sender.send("sync:end", {
+        index,
+        error: errorMessage,
+        duration: duration,
+      });
+    }
+  },
+);

@@ -29,25 +29,25 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveFile: (options?: Electron.SaveDialogOptions) => ipcRenderer.invoke("dialog:saveFile", options),
 
   // Start sync/copy operation
-  startSync: (options: { source: string; target: string; deleteMode: boolean }) =>
+  startSync: (options: { source: string; target: string; deleteMode: boolean; index: number }) =>
     ipcRenderer.send("sync:start", options),
 
   // Listen for sync progress events
-  onSyncProgress: (callback: (data: any) => void) => {
-    const listener = (_event: any, data: any) => callback(data);
+  onSyncProgress: (callback: (data: { index: number; data: any }) => void) => {
+    const listener = (_event: any, data: { index: number; data: any }) => callback(data);
     ipcRenderer.on("sync:progress", listener);
     return () => ipcRenderer.removeListener("sync:progress", listener);
   },
 
   // Listen for sync log events
-  onSyncLog: (callback: (line: string) => void) => {
-    const listener = (_event: any, line: string) => callback(line);
+  onSyncLog: (callback: (data: { index: number; line: string }) => void) => {
+    const listener = (_event: any, data: { index: number; line: string }) => callback(data);
     ipcRenderer.on("sync:log", listener);
     return () => ipcRenderer.removeListener("sync:log", listener);
   },
 
   // Listen for sync end events
-  onSyncEnd: (callback: (result: { error: string | null; duration: string }) => void) => {
+  onSyncEnd: (callback: (result: { index: number; error: string | null; duration: string }) => void) => {
     const listener = (_event: any, result: any) => callback(result);
     ipcRenderer.on("sync:end", listener);
     return () => ipcRenderer.removeListener("sync:end", listener);
@@ -67,10 +67,10 @@ declare global {
       openDirectory: () => Promise<string | null>;
       openFile: (filters?: Electron.FileFilter[]) => Promise<string | null>;
       saveFile: (options?: Electron.SaveDialogOptions) => Promise<string | null>;
-      startSync: (options: { source: string; target: string; deleteMode: boolean }) => void;
-      onSyncProgress: (callback: (data: any) => void) => () => void;
-      onSyncLog: (callback: (line: string) => void) => () => void;
-      onSyncEnd: (callback: (result: { error: string | null; duration: string }) => void) => () => void;
+      startSync: (options: { source: string; target: string; deleteMode: boolean; index: number }) => void;
+      onSyncProgress: (callback: (data: { index: number; data: any }) => void) => () => void;
+      onSyncLog: (callback: (data: { index: number; line: string }) => void) => () => void;
+      onSyncEnd: (callback: (result: { index: number; error: string | null; duration: string }) => void) => () => void;
     };
   }
 }

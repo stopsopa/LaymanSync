@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { FC } from "react";
 import type { MainOptionalTypes } from "../../tools/commonTypes";
 import DropzoneDirectory from "./DropzoneDirectory";
 import ConfirmationModal from "./ConfirmationModal";
+import type { RowState } from "./Wizard";
 
 interface RowCRUDComponentProps {
   item: MainOptionalTypes;
@@ -10,19 +11,32 @@ interface RowCRUDComponentProps {
   onUpdate: (index: number, updates: Partial<MainOptionalTypes>) => void;
   onRemove: (index: number) => void;
   onMove: (dragIndex: number, hoverIndex: number) => void;
+  isSyncing: boolean;
+  state?: RowState;
 }
 
-const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, onRemove, onMove }) => {
+const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, onRemove, onMove, isSyncing, state }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isLogsExpanded, setIsLogsExpanded] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLPreElement>(null);
+
+  // Auto-scroll logs to bottom
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [state?.logs]);
 
   const handleDragStart = (e: React.DragEvent) => {
+    if (isSyncing) return;
     e.dataTransfer.setData("drag-index", index.toString());
     e.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragOver = (e: React.DragEvent) => {
+    if (isSyncing) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     setIsDraggingOver(true);
@@ -33,6 +47,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
   };
 
   const handleDrop = (e: React.DragEvent) => {
+    if (isSyncing) return;
     e.preventDefault();
     setIsDraggingOver(false);
     const dragIndex = parseInt(e.dataTransfer.getData("drag-index"), 10);
@@ -76,10 +91,25 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
     }
   };
 
+  const progressPercent = state?.progress?.progressPercentHuman || (state?.status === "done" ? "100%" : "0%");
+  const statusLabel = () => {
+    if (!state) return "WAITING IN QUEUE";
+    if (state.status === "running") return `SYNCING: ${progressPercent}`;
+    if (state.status === "done") return `FINISHED (${state.duration || "0s"})`;
+    if (state.status === "error") return "ERROR OCCURRED";
+    return "WAITING IN QUEUE";
+  };
+
+  const getProgressColor = () => {
+    if (state?.status === "done") return "#4caf50";
+    if (state?.status === "error") return "#d32f2f";
+    return "linear-gradient(90deg, #0073bb, #00a1c9)";
+  };
+
   return (
     <div
       className={`config-item-card ${isDraggingOver ? "dragging-over" : ""}`}
-      draggable
+      draggable={!isSyncing}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -89,13 +119,16 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
         backdropFilter: "blur(10px)",
         padding: "10px 15px",
         borderRadius: "12px",
-        border: `1px solid ${isDraggingOver ? "#0073bb" : "rgba(224, 224, 224, 0.5)"}`,
+        border: `1px solid ${
+          state?.status === "error" ? "rgba(211, 47, 47, 0.4)" : isDraggingOver ? "#0073bb" : "rgba(224, 224, 224, 0.5)"
+        }`,
         boxShadow: "0 4px 16px rgba(0, 0, 0, 0.05)",
         display: "flex",
         flexDirection: "column",
         gap: "6px",
         transition: "all 0.2s ease",
         position: "relative",
+        opacity: isSyncing && state?.status === "waiting" ? 0.7 : 1,
       }}
     >
       <div style={{ display: "flex", gap: "10px", alignItems: "stretch" }}>
@@ -106,13 +139,13 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            cursor: "grab",
+            cursor: isSyncing ? "not-allowed" : "grab",
             color: "#ccc",
             background: "rgba(0,0,0,0.02)",
             borderRadius: "6px",
             border: "1px solid rgba(0,0,0,0.03)",
           }}
-          title="Drag to reorder"
+          title={isSyncing ? "Sorting disabled during sync" : "Drag to reorder"}
         >
           <svg width="12" height="20" viewBox="0 0 12 20" fill="currentColor">
             <circle cx="2" cy="2" r="1.5" />
@@ -143,13 +176,15 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               </label>
               <DropzoneDirectory
                 onChange={(path) => onUpdate(index, { source: path })}
+                disabled={isSyncing}
                 style={{
                   minHeight: "34px",
                   padding: "2px 12px",
                   fontSize: "0.85rem",
                   borderRadius: "8px",
-                  background: "rgba(0,0,0,0.02)",
+                  background: isSyncing ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.02)",
                   border: "1px dashed rgba(0,0,0,0.1)",
+                  cursor: isSyncing ? "not-allowed" : "pointer",
                 }}
               >
                 <div
@@ -167,13 +202,13 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
             </div>
             <button
               onClick={handleRevealSource}
-              disabled={!item.source}
+              disabled={!item.source || isSyncing}
               className="aws-button aws-button-secondary"
               style={{
                 marginTop: "16px",
                 whiteSpace: "nowrap",
-                opacity: item.source ? 1 : 0.5,
-                cursor: item.source ? "pointer" : "not-allowed",
+                opacity: item.source && !isSyncing ? 1 : 0.5,
+                cursor: item.source && !isSyncing ? "pointer" : "not-allowed",
                 padding: "4px 10px",
                 fontSize: "0.75rem",
                 height: "34px",
@@ -201,13 +236,15 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               </label>
               <DropzoneDirectory
                 onChange={(path) => onUpdate(index, { target: path })}
+                disabled={isSyncing}
                 style={{
                   minHeight: "34px",
                   padding: "2px 12px",
                   fontSize: "0.85rem",
                   borderRadius: "8px",
-                  background: "rgba(0,0,0,0.02)",
+                  background: isSyncing ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.02)",
                   border: "1px dashed rgba(0,0,0,0.1)",
+                  cursor: isSyncing ? "not-allowed" : "pointer",
                 }}
               >
                 <div
@@ -225,13 +262,13 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
             </div>
             <button
               onClick={handleRevealTarget}
-              disabled={!item.target}
+              disabled={!item.target || isSyncing}
               className="aws-button aws-button-secondary"
               style={{
                 marginTop: "16px",
                 whiteSpace: "nowrap",
-                opacity: item.target ? 1 : 0.5,
-                cursor: item.target ? "pointer" : "not-allowed",
+                opacity: item.target && !isSyncing ? 1 : 0.5,
+                cursor: item.target && !isSyncing ? "pointer" : "not-allowed",
                 padding: "4px 10px",
                 fontSize: "0.75rem",
                 height: "34px",
@@ -260,20 +297,22 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               background: item.delete ? "rgba(211, 47, 47, 0.08)" : "transparent",
               border: `1px solid ${item.delete ? "rgba(211, 47, 47, 0.25)" : "rgba(0,0,0,0.04)"}`,
               transition: "all 0.3s ease",
-              cursor: "pointer",
+              cursor: isSyncing ? "not-allowed" : "pointer",
+              opacity: isSyncing ? 0.6 : 1,
             }}
-            onClick={() => onUpdate(index, { delete: !item.delete })}
+            onClick={() => !isSyncing && onUpdate(index, { delete: !item.delete })}
           >
             <input
               type="checkbox"
               checked={!!item.delete}
-              onChange={(e) => onUpdate(index, { delete: e.target.checked })}
+              onChange={(e) => !isSyncing && onUpdate(index, { delete: e.target.checked })}
               onClick={(e) => e.stopPropagation()}
+              disabled={isSyncing}
               style={{
                 width: "16px",
                 height: "16px",
                 accentColor: "#d32f2f",
-                cursor: "pointer",
+                cursor: isSyncing ? "not-allowed" : "pointer",
               }}
             />
             <span
@@ -322,16 +361,16 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
             borderRadius: "6px",
             overflow: "hidden",
             position: "relative",
-            border: "1px solid rgba(0,0,0,0.02)",
+            border: `1px solid ${state?.status === "running" ? "#0073bb" : "rgba(0,0,0,0.02)"}`,
           }}
         >
           <div
             style={{
-              width: "0%",
+              width: progressPercent,
               height: "100%",
-              background: "linear-gradient(90deg, #0073bb, #00a1c9)",
+              background: getProgressColor(),
               borderRadius: "6px",
-              transition: "width 0.5s ease",
+              transition: "width 0.5s ease, background 0.3s ease",
             }}
           />
           <span
@@ -341,17 +380,23 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               left: "50%",
               transform: "translate(-50%, -50%)",
               fontSize: "0.65rem",
-              color: "#555",
+              color:
+                state?.status === "running" || state?.status === "done" || state?.status === "error" ? "#fff" : "#555",
               fontWeight: "700",
               textTransform: "uppercase",
               letterSpacing: "0.8px",
+              textShadow:
+                state?.status === "running" || state?.status === "done" || state?.status === "error"
+                  ? "0 1px 2px rgba(0,0,0,0.3)"
+                  : "none",
             }}
           >
-            WAITING IN QUEUE
+            {statusLabel()}
           </span>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
+          disabled={isSyncing}
           className="aws-button"
           style={{
             width: "28px",
@@ -367,6 +412,8 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
             borderRadius: "6px",
             transition: "all 0.2s ease",
             flexShrink: 0,
+            opacity: isSyncing ? 0.3 : 1,
+            cursor: isSyncing ? "not-allowed" : "pointer",
           }}
           title="Remove this entry"
         >
@@ -387,6 +434,71 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
           </svg>
         </button>
       </div>
+
+      {/* FIFTH ROW: LOG TOGGLE */}
+      <div style={{ display: "flex", justifyContent: "flex-start", marginTop: "2px" }}>
+        <button
+          onClick={() => setIsLogsExpanded(!isLogsExpanded)}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#0073bb",
+            fontSize: "0.7rem",
+            fontWeight: "600",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            padding: "0",
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
+          }}
+        >
+          {isLogsExpanded ? "▼ Hide Logs" : "▶ Show Logs"}
+          {state?.logs && state.logs.length > 0 && ` (${state.logs.length})`}
+        </button>
+      </div>
+
+      {/* LOG SECTION */}
+      {isLogsExpanded && (
+        <div
+          style={{
+            marginTop: "4px",
+            background: "#1e1e1e",
+            borderRadius: "6px",
+            border: "1px solid #333",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            height: "160px",
+          }}
+        >
+          <pre
+            ref={scrollRef}
+            style={{
+              flex: 1,
+              margin: 0,
+              padding: "8px 12px",
+              color: "#eee",
+              fontSize: "0.75rem",
+              fontFamily: "'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-all",
+              overflowY: "auto",
+              lineHeight: "1.4",
+            }}
+          >
+            {state?.logs && state.logs.length > 0
+              ? state.logs.join("\n")
+              : state?.status === "waiting"
+                ? "Waiting in queue..."
+                : "Initializing..."}
+            {state?.error && (
+              <div style={{ color: "#ff5252", marginTop: "8px", fontWeight: "bold" }}>ERROR: {state.error}</div>
+            )}
+          </pre>
+        </div>
+      )}
 
       {isModalOpen && (
         <ConfirmationModal
