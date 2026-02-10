@@ -106,7 +106,7 @@
   "release": {
     "branches": [
       "main",
-      "**"
+      "multiple"
     ],
     "plugins": [
       "@semantic-release/commit-analyzer",
@@ -115,4 +115,3 @@
     ]
   }
 }
-
