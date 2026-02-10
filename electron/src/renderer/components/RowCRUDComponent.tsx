@@ -102,7 +102,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
 
   const getProgressColor = () => {
     if (state?.status === "done") return "#4caf50";
-    if (state?.status === "error") return "#d32f2f";
+    if (state?.status === "error") return "#ff1744"; // Brighter, more vibrant red
     return "linear-gradient(90deg, #0073bb, #00a1c9)";
   };
 
@@ -120,9 +120,16 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
         padding: "10px 15px",
         borderRadius: "12px",
         border: `1px solid ${
-          state?.status === "error" ? "rgba(211, 47, 47, 0.4)" : isDraggingOver ? "#0073bb" : "rgba(224, 224, 224, 0.5)"
+          state?.status === "error"
+            ? "#ff1744" // Vibrant red border for errors
+            : isDraggingOver
+              ? "#0073bb"
+              : "rgba(224, 224, 224, 0.5)"
         }`,
-        boxShadow: "0 4px 16px rgba(0, 0, 0, 0.05)",
+        boxShadow:
+          state?.status === "error"
+            ? "0 0 12px rgba(255, 23, 68, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1)" // Red glow for errors
+            : "0 4px 16px rgba(0, 0, 0, 0.05)",
         display: "flex",
         flexDirection: "column",
         gap: "6px",
@@ -357,16 +364,19 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
           style={{
             flex: 1,
             height: "28px",
-            background: "rgba(0,0,0,0.04)",
+            background: state?.status === "error" ? "rgba(255, 23, 68, 0.1)" : "rgba(0,0,0,0.04)",
             borderRadius: "6px",
             overflow: "hidden",
             position: "relative",
-            border: `1px solid ${state?.status === "running" ? "#0073bb" : "rgba(0,0,0,0.02)"}`,
+            border: `1px solid ${
+              state?.status === "error" ? "#ff1744" : state?.status === "running" ? "#0073bb" : "rgba(0,0,0,0.02)"
+            }`,
+            boxShadow: state?.status === "error" ? "inset 0 0 10px rgba(255, 23, 68, 0.1)" : "none",
           }}
         >
           <div
             style={{
-              width: progressPercent,
+              width: state?.status === "error" ? "100%" : progressPercent,
               height: "100%",
               background: getProgressColor(),
               borderRadius: "6px",
@@ -382,13 +392,15 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({ item, index, onUpdate, on
               fontSize: "0.65rem",
               color:
                 state?.status === "running" || state?.status === "done" || state?.status === "error" ? "#fff" : "#555",
-              fontWeight: "700",
+              fontWeight: "900", // Extra bold for better visibility
               textTransform: "uppercase",
-              letterSpacing: "0.8px",
+              letterSpacing: "1px",
               textShadow:
-                state?.status === "running" || state?.status === "done" || state?.status === "error"
-                  ? "0 1px 2px rgba(0,0,0,0.3)"
-                  : "none",
+                state?.status === "error"
+                  ? "0 1px 4px rgba(0,0,0,0.6)" // Stronger shadow for error
+                  : state?.status === "running" || state?.status === "done"
+                    ? "0 1px 2px rgba(0,0,0,0.3)"
+                    : "none",
             }}
           >
             {statusLabel()}
