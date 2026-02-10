@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { MainOptionalTypes } from "../../tools/commonTypes";
 
 class ConfigManager {
@@ -82,12 +82,12 @@ export const configManager = new ConfigManager();
 export function useConfigManager() {
   // Use a counter or timestamp to trigger re-renders since the actual
   // data might be complex or managed externally.
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     // Subscribe to the singleton's notify events
     return configManager.subscribe(() => {
-      setTick((tick) => tick + 1);
+      setTick((t) => t + 1);
     });
   }, []);
 
@@ -99,10 +99,14 @@ export function useConfigManager() {
     return configManager.set(data);
   }, []);
 
+  // Memoize data and the path so they don't change unless tick changes
+  const path = tick >= 0 ? configManager.getPath() : null;
+  const data = useMemo(() => configManager.get() || [], [tick]);
+
   return {
-    path: configManager.getPath(),
+    path,
     setPath,
-    data: configManager.get() || [],
+    data,
     getConfig: useCallback(() => configManager.get(), []),
     setConfig,
   };

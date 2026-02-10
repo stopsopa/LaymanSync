@@ -1,7 +1,8 @@
 import { spawn } from "node:child_process";
-import generateRcloneParams from "./generateRcloneParams.js";
+import generateRcloneParams, { generateRcloneParamsStrings } from "./generateRcloneParams.js";
 import { timeHumanReadable } from "./timeHumanReadable.js";
 import { determineBinaryAbsolutePath } from "./determineBinaryAbsolutePath.js";
+import { escapeFilePath } from "./escapeFilePath.js";
 
 import type { MainTypes, DriveCompressionOptions } from "./commonTypes.js";
 
@@ -42,6 +43,16 @@ export default async function driveCompression(options: DriveCompressionOptions)
 
       let stdoutRemainder = "";
       let stderrRemainder = "";
+
+      if (log) {
+        log(
+          `${escapeFilePath(mainExec)} ${generateRcloneParamsStrings({
+            source,
+            target,
+            delete: options.delete ?? false,
+          })}`,
+        );
+      }
 
       const handleData = (data: Buffer, isStdout: boolean) => {
         const text = (isStdout ? stdoutRemainder : stderrRemainder) + data.toString();

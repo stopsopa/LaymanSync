@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import { type FC } from "react";
 import type { RowState } from "./Wizard";
 
 type LogicComponentProps = {
@@ -37,7 +37,7 @@ const LogicComponent: FC<LogicComponentProps> = ({
 
   const handleRemoveItem = (index: number) => {
     if (isSyncing) return;
-    const newData = data.filter((_, i) => i !== index);
+    const newData = data.filter((_, i: number) => i !== index);
     setConfig(newData);
   };
 
@@ -95,7 +95,7 @@ const LogicComponent: FC<LogicComponentProps> = ({
             No configuration entries found in this file. Click "Add New Entry" to get started.
           </div>
         ) : (
-          data.map((item, index) => (
+          data.map((item: any, index: number) => (
             <RowCRUDComponent
               key={index}
               item={item}
@@ -122,28 +122,45 @@ const LogicComponent: FC<LogicComponentProps> = ({
           alignItems: "center",
         }}
       >
+        <div id="popover-reset" popover="manual">
+          Clears all sync progress, logs, and status from the previous run to allow a fresh start or new changes.
+        </div>
         <button
           className="aws-button aws-button-secondary"
           onClick={onReset}
           disabled={!isFinished || isSyncing}
-          style={{
-            minWidth: "100px",
-            opacity: !isFinished || isSyncing ? 0.5 : 1,
-            cursor: !isFinished || isSyncing ? "not-allowed" : "pointer",
-          }}
+          onMouseEnter={(e) => (e.currentTarget.previousElementSibling as any)?.showPopover()}
+          onMouseLeave={(e) => (e.currentTarget.previousElementSibling as any)?.hidePopover()}
+          style={
+            {
+              minWidth: "100px",
+              opacity: !isFinished || isSyncing ? 0.5 : 1,
+              cursor: !isFinished || isSyncing ? "not-allowed" : "pointer",
+              anchorName: "--anchor-reset",
+            } as any
+          }
         >
           Reset
         </button>
+
+        <div id="popover-start" popover="manual">
+          Launches the rclone sync/copy process for all directories defined in the configuration file.
+        </div>
         <button
           className="aws-button aws-button-primary"
           onClick={onStart}
           disabled={isSyncing || data.length === 0}
-          style={{
-            minWidth: "140px",
-            padding: "10px 24px",
-            opacity: isSyncing || data.length === 0 ? 0.5 : 1,
-            cursor: isSyncing || data.length === 0 ? "not-allowed" : "pointer",
-          }}
+          onMouseEnter={(e) => (e.currentTarget.previousElementSibling as any)?.showPopover()}
+          onMouseLeave={(e) => (e.currentTarget.previousElementSibling as any)?.hidePopover()}
+          style={
+            {
+              minWidth: "140px",
+              padding: "10px 24px",
+              opacity: isSyncing || data.length === 0 ? 0.5 : 1,
+              cursor: isSyncing || data.length === 0 ? "not-allowed" : "pointer",
+              anchorName: "--anchor-start",
+            } as any
+          }
         >
           {isSyncing ? "Syncing..." : "Start Sync"}
         </button>

@@ -61,7 +61,7 @@ function Wizard() {
 
     // Initialize states for all rows
     const initialStates: Record<number, RowState> = {};
-    config.forEach((_, i) => {
+    config.forEach((_, i: number) => {
       initialStates[i] = {
         progress: null,
         logs: [],

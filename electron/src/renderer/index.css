@@ -195,3 +195,57 @@ body,
   gap: var(--spacing-md);
   background-color: #fafafa;
 }
+
+/* Popover Styles */
+[popover] {
+  padding: 12px 16px;
+  border: 1px solid var(--aws-border);
+  border-radius: 4px;
+  background: var(--aws-white);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--aws-text-dark);
+  max-width: 250px;
+  margin: 0; /* Important for anchor positioning */
+  z-index: 10000;
+  pointer-events: none; /* Make it a tooltip-like, so it doesn't interfere with clicks */
+}
+
+/* Fade in animation for popover */
+[popover]:popover-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[popover] {
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.2s,
+    transform 0.2s,
+    overlay 0.2s allow-discrete,
+    display 0.2s allow-discrete;
+}
+
+@starting-style {
+  [popover]:popover-open {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* Anchor Positioning - Modern browsers (Chrome 125+) */
+#popover-reset {
+  position-anchor: --anchor-reset;
+  bottom: anchor(top);
+  left: anchor(center);
+  transform: translateX(-50%) translateY(-8px);
+}
+
+#popover-start {
+  position-anchor: --anchor-start;
+  bottom: anchor(top);
+  left: anchor(center);
+  transform: translateX(-50%) translateY(-8px);
+}
