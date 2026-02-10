@@ -1,5 +1,5 @@
 {
-  "name": "laymansync",
+  "name": "laymansyncbulk",
   "private": true,
   "repository": {
     "type": "git",
@@ -18,8 +18,8 @@
     "build": "node scripts/generate-version.js && tsc -b && vite build && tsc -p tsconfig.main.json && tsc -p tsconfig.preload.json"
   },
   "build": {
-    "appId": "com.stopsopa.laymansync",
-    "productName": "LaymanSync",
+    "appId": "com.stopsopa.laymansyncbulk",
+    "productName": "LaymanSyncBulk",
     "directories": {
       "output": "release"
     },

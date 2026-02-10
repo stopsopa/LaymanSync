@@ -1,4 +1,4 @@
-# LaymanSync
+# LaymanSyncBulk
 
 A simple, user-friendly, and easy-to-install desktop UI for [rclone](https://rclone.org/).
 
@@ -78,8 +78,8 @@ How to choose right version of binary from [Releases](https://github.com/stopsop
 
 Select file:
 
-- **LaymanSync-x.x.x-x64-setup.exe** for Windows with Intel or AMD processor
-- **LaymanSync-x.x.x-arm64-setup.exe** for Windows with ARM processor
+- **LaymanSyncBulk-x.x.x-x64-setup.exe** for Windows with Intel or AMD processor
+- **LaymanSyncBulk-x.x.x-arm64-setup.exe** for Windows with ARM processor
 
 from: [Releases](https://github.com/stopsopa/LaymanSync/releases) page.
 
@@ -89,8 +89,8 @@ Then follow [WINDOWS_SECURITY](WINDOWS_SECURITY.md) file for further instruction
 
 Select file:
 
-- **LaymanSync-x.x.x-x64.dmg** for older mac with Intel processor
-- **LaymanSync-x.x.x-arm64.dmg** for newer macs with ARM (M1, M2, M3 and so on...) processors
+- **LaymanSyncBulk-x.x.x-x64.dmg** for older mac with Intel processor
+- **LaymanSyncBulk-x.x.x-arm64.dmg** for newer macs with ARM (M1, M2, M3 and so on...) processors
 
 from [Releases](https://github.com/stopsopa/LaymanSync/releases) page.
 

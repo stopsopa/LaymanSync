@@ -33,7 +33,7 @@ async function createWindow() {
       nodeIntegration: false,
       webSecurity: false,
     },
-    title: "LaymanSync",
+    title: "LaymanSyncBulk",
   });
 
   if (process.platform === "darwin" && app.dock) {
