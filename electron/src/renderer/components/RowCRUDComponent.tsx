@@ -33,6 +33,8 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
   const popoverRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLPreElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [logHeight, setLogHeight] = useState(160);
+  const isResizingRef = useRef(false);
 
   // Auto-scroll logs to bottom
   useEffect(() => {
@@ -40,6 +42,28 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [state?.logs]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizingRef.current) return;
+
+      const newHeight = Math.max(100, Math.min(800, e.clientY - (scrollRef.current?.getBoundingClientRect().top || 0)));
+      setLogHeight(newHeight);
+    };
+
+    const handleMouseUp = () => {
+      isResizingRef.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
 
   const handleDragStart = (e: React.DragEvent) => {
     if (isSyncing) return;
@@ -581,7 +605,8 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
-            height: "160px",
+            height: `${logHeight}px`,
+            position: "relative",
           }}
         >
           <pre
@@ -589,7 +614,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
             style={{
               flex: 1,
               margin: 0,
-              padding: "8px 12px",
+              padding: "8px 12px 16px 12px", // Extra bottom padding for handle
               color: "#eee",
               fontSize: "0.75rem",
               fontFamily: "'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace",
@@ -608,6 +633,46 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
               <div style={{ color: "#ff5252", marginTop: "8px", fontWeight: "bold" }}>ERROR: {state.error}</div>
             )}
           </pre>
+          <div
+            onMouseDown={(e) => {
+              e.preventDefault();
+              isResizingRef.current = true;
+              document.body.style.cursor = "ns-resize";
+              document.body.style.userSelect = "none";
+            }}
+            style={{
+              height: "10px",
+              background: "var(--aws-bg-light)",
+              borderTop: "1px solid var(--aws-border)",
+              cursor: "ns-resize",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--aws-border)";
+              const grip = e.currentTarget.firstChild as HTMLElement;
+              if (grip) grip.style.background = "var(--aws-text-dark)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "var(--aws-bg-light)";
+              const grip = e.currentTarget.firstChild as HTMLElement;
+              if (grip) grip.style.background = "var(--aws-text-light)";
+            }}
+          >
+            <div
+              style={{
+                width: "40px",
+                height: "2px",
+                background: "var(--aws-text-light)",
+                borderRadius: "2px",
+                boxShadow: "0 1px 0 rgba(255,255,255,0.8)",
+                transition: "all 0.2s ease",
+              }}
+            />
+          </div>
         </div>
       )}
 
