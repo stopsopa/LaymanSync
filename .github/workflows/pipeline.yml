@@ -537,3 +537,12 @@ jobs:
     with:
       tag_name: ${{ needs.bump.outputs.new_tag }}
     secrets: inherit
+
+  # STEP 5: Deploy to GitHub Pages (Release update)
+  pages:
+    needs: [bump, build-release]
+    if: needs.bump.outputs.released == 'true'
+    uses: ./.github/workflows/deploy-pages.yml
+    with:
+      version: ${{ needs.bump.outputs.new_tag }}
+    secrets: inherit

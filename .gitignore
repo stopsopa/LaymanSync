@@ -26,3 +26,4 @@ log.log
 /structures/
 /electron/src/renderer/version.json
 /structure-gen.json
+/public/
