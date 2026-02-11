@@ -1,4 +1,4 @@
-export const projectName = "LaymanSync";
+export const projectName = "LaymanSyncBulk";
 
 export const githubHomepage = `https://github.com/stopsopa/LaymanSync`;
 
