@@ -28,10 +28,6 @@ Once app was doing good enough job and was handling errors properly I don't see 
 
 So here it is. I hope you find it useful.
 
----
-
-There is [alternative branch](https://github.com/stopsopa/LaymanSync/tree/gemini3flash) where UI was build with Gemini 3 Flash (non-thinking) via Antigravity - It's also usable but for no real reason honestly I've picked implementation with Claude 4.5 Sonnet. None of these were any better in any significant way.
-
 ## Key Features
 
 - ✅ **Simple Drag & Drop** – Easily select source and destination directories.
@@ -41,6 +37,11 @@ There is [alternative branch](https://github.com/stopsopa/LaymanSync/tree/gemini
 - ✅ **Live Logs** – View the raw output from `rclone` for transparency and troubleshooting.
 - ✅ **Premium UI** – Clean and structured interface inspired by the AWS Console aesthetics.
 - ✅ **Cross-Platform** – Built with Electron for consistent performance on macOS and Windows.
+
+# EXTENDED VERSION
+
+> [!CAUTION]
+> There is [alternative extended (bulk) version](https://github.com/stopsopa/LaymanSync/tree/multiple) of this app where we can work with synchronisation of multiple directories at once through config files
 
 ## Installation
 
