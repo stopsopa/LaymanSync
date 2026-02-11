@@ -271,10 +271,10 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
           </svg>
         </div>
 
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px", minWidth: "0" }}>
           {/* FIRST ROW: SOURCE */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: "0" }}>
               <label
                 style={{
                   fontSize: "0.65rem",
@@ -337,7 +337,7 @@ const RowCRUDComponent: FC<RowCRUDComponentProps> = ({
 
           {/* SECOND ROW: DESTINATION */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: "0" }}>
               <label
                 style={{
                   fontSize: "0.65rem",

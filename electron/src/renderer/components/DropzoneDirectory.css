@@ -12,6 +12,7 @@
   position: relative;
   overflow: hidden;
   font-size: 0.75rem;
+  min-width: 0;
 }
 
 .custom-dropzone-directory:hover {
@@ -43,6 +44,8 @@
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .default-dropzone-directory-content {
@@ -50,6 +53,17 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.default-dropzone-directory-content p {
+  margin: 0;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dropzone-directory-icon {
@@ -82,6 +96,10 @@
   flex-direction: column;
   align-items: flex-start;
   font-weight: 700;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @keyframes shake {

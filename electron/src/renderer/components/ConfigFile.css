@@ -99,9 +99,12 @@
   background-color: #f1f3f3;
   padding: var(--spacing-sm);
   border-radius: 4px;
-  word-break: break-all;
   border: 1px solid var(--aws-border);
   color: var(--aws-text-dark);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .create-new-action {
