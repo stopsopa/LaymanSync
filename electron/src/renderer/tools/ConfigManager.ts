@@ -4,9 +4,31 @@ import type { MainOptionalTypes } from "../../tools/commonTypes";
 class ConfigManager {
   private path: string | null = null;
   private listeners: Set<() => void> = new Set();
+  private persistentStatePath: string | null = null;
 
   constructor(path: string | null = null) {
     this.path = path;
+    this.initPersistentState();
+  }
+
+  private async initPersistentState() {
+    try {
+      const userDataPath = await window.electronAPI.getUserDataPath();
+      // Ensure cross-platform path joining consistency
+      const separator = userDataPath.includes("\\") ? "\\" : "/";
+      this.persistentStatePath = userDataPath + separator + "last-config-path.json";
+
+      const savedState = window.electronAPI.readJsonSync(this.persistentStatePath);
+      if (savedState && savedState.lastPath) {
+        // Verify file exists and is readable before restoring
+        const testRead = window.electronAPI.readJsonSync(savedState.lastPath);
+        if (testRead) {
+          this.setPath(savedState.lastPath);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to initialize persistent config state:", error);
+    }
   }
 
   /**
@@ -32,6 +54,11 @@ class ConfigManager {
   setPath(path: string | null): void {
     this.path = path;
     this.notify();
+
+    // Persist path if it's set
+    if (this.persistentStatePath && path) {
+      window.electronAPI.writeJsonSync(this.persistentStatePath, { lastPath: path });
+    }
   }
 
   /**

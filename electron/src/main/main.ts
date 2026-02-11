@@ -149,6 +149,11 @@ ipcMain.on("app:openExternal", (_event, url: string) => {
   shell.openExternal(url);
 });
 
+// Get user data path
+ipcMain.handle("app:getUserDataPath", () => {
+  return app.getPath("userData");
+});
+
 // Synchronous JSON file reading
 ipcMain.on("file:read-json-sync", (event, filePath: string) => {
   try {

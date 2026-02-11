@@ -15,6 +15,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Open external URL
   openExternal: (url: string) => ipcRenderer.send("app:openExternal", url),
 
+  // Get user data path
+  getUserDataPath: () => ipcRenderer.invoke("app:getUserDataPath"),
+
   // Synchronous JSON file operations
   readJsonSync: (filePath: string) => ipcRenderer.sendSync("file:read-json-sync", filePath),
   writeJsonSync: (filePath: string, data: any) => ipcRenderer.sendSync("file:write-json-sync", { filePath, data }),
@@ -64,6 +67,7 @@ declare global {
       revealDirectory: (dirPath: string) => void;
       getRcloneVersion: () => Promise<string>;
       openExternal: (url: string) => void;
+      getUserDataPath: () => Promise<string>;
       readJsonSync: (filePath: string) => any;
       writeJsonSync: (filePath: string, data: any) => boolean;
       openDirectory: () => Promise<string | null>;
