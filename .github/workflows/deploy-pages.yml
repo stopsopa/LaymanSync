@@ -59,13 +59,11 @@ jobs:
 
       - name: Prepare deployment directory
         run: |
-          mkdir -p deploy
-          # Copy everything except hidden files/folders and the deploy folder itself
-          cp -r ./* deploy/ 2>/dev/null || true
-          rm -rf deploy/.git
-          rm -rf deploy/.github
-          # Verify download.html exists
-          ls -l deploy/public/download.html
+          set -x
+          BRANCH_NAME="${{ github.ref_name }}"
+          mkdir -p "deploy/${BRANCH_NAME}"
+          cp -r public/* "deploy/${BRANCH_NAME}/" 
+          ls -l "deploy/${BRANCH_NAME}/download.html"
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
@@ -73,5 +71,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./deploy
-          destination_dir: ${{ github.ref_name }}
           keep_files: true

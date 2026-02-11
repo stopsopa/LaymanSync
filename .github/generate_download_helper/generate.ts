@@ -12,38 +12,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ------------------------ vvv
-
-const projectName = "LaymanSyncBulk";
-
-const githubHomepage = `https://github.com/stopsopa/LaymanSync`;
-
-const list = [
-  {
-    label: "Windows - ARM based",
-    postfix: "-arm64-setup.exe",
-    os: "win",
-    arch: "arm64",
-  },
-  {
-    label: "Windows - x64 based (Intel & AMD)",
-    postfix: "-x64-setup.exe",
-    os: "win",
-    arch: "x64",
-  },
-  {
-    label: "MacOS - ARM based (Apple Silicon, M1, M2, M3, M4, M5)",
-    postfix: "-arm64.dmg",
-    os: "mac",
-    arch: "arm64",
-  },
-  {
-    label: "MacOS - x64 based (Intel)",
-    postfix: "-x64.dmg",
-    os: "mac",
-    arch: "x64",
-  },
-];
+import { projectName, githubHomepage, list } from "./config.ts";
 
 // ------------------------ ^^^
 
@@ -98,6 +67,14 @@ template = template.replace(
 );
 template = template.replace(`ribbonlink`, githubHomepage);
 template = template.replace(`Assets`, `Assets (v${version})`);
+
+// handling additions section vvv
+const additions = path.join(__dirname, "additions.html");
+if (fs.existsSync(additions)) {
+  const additionsContent = fs.readFileSync(additions, "utf-8");
+  template = template.replace(`<div id="additions"></div>`, additionsContent);
+}
+// handling additions section ^^^
 
 const target = process.argv[3];
 
