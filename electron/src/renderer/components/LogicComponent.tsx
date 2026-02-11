@@ -4,7 +4,6 @@ import type { RowState } from "./Wizard";
 type LogicComponentProps = {
   toConfig: () => void;
   isSyncing: boolean;
-  isFinished: boolean;
   rowStates: Record<number, RowState>;
   dirExistence: Record<number, { source: boolean; target: boolean }>;
   onStart: () => void;
@@ -17,7 +16,6 @@ import RowCRUDComponent from "./RowCRUDComponent";
 const LogicComponent: FC<LogicComponentProps> = ({
   toConfig: _toConfig,
   isSyncing,
-  isFinished,
   rowStates,
   dirExistence,
   onStart,
@@ -134,7 +132,8 @@ const LogicComponent: FC<LogicComponentProps> = ({
             zIndex: 10000,
           }}
         >
-          Clears all sync progress, logs, and status from the previous run to allow a fresh start or new changes.
+          Clears all sync progress, logs, and status from the previous run to allow a fresh start or new changes. It
+          also re-evaluates whether source and target folders exist.
         </div>
         <div
           onMouseEnter={(e: any) => {
@@ -152,11 +151,11 @@ const LogicComponent: FC<LogicComponentProps> = ({
           <button
             className="aws-button aws-button-secondary"
             onClick={onReset}
-            disabled={!isFinished || isSyncing}
+            disabled={isSyncing}
             style={{
               minWidth: "100px",
-              opacity: !isFinished || isSyncing ? 0.5 : 1,
-              cursor: !isFinished || isSyncing ? "not-allowed" : "pointer",
+              opacity: isSyncing ? 0.5 : 1,
+              cursor: isSyncing ? "not-allowed" : "pointer",
             }}
           >
             Reset

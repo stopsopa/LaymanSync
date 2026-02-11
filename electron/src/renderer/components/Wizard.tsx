@@ -167,7 +167,6 @@ function Wizard() {
             <LogicComponent
               toConfig={() => setConfigWizzardStep(true)}
               isSyncing={isSyncing}
-              isFinished={isFinished}
               rowStates={rowStates}
               dirExistence={dirExistence}
               onStart={startSync}
