@@ -18,7 +18,6 @@ module.exports = (setup) => {
     help: {
       command: `
 set -e  
-
         
 cat <<EEE
 
@@ -29,6 +28,10 @@ cat <<EEE
 /bin/bash electron/download-bins.sh
   # WARNING: run this at least once
   # bring binary for our OS and architecture
+
+  dev server (xx "dev server"):
+    http://localhost:4286/
+    http://localhost:4286/public/download.html
 
 EEE
 
@@ -105,6 +108,38 @@ read
 
 open "\${FILE}"
       `,
+      confirm: false,
+    },
+
+    [`dev server`]: {
+      command: `
+PORT="4286"
+cat <<EEE
+
+    http://localhost:\${PORT}
+EEE
+
+echo -e "\n      Press enter to continue\n"
+read
+
+TARGET="./"
+
+# detect python version and run one or another version
+cd "\${TARGET}"
+if python3 -c "import http.server" > /dev/null 2>&1; then
+    echo -e "\nrunning: python3 -m http.server \${PORT}\n"
+    python3 -m http.server \${PORT}
+elif python -c "import http.server" > /dev/null 2>&1; then
+    echo -e "\nrunning: python -m http.server \${PORT}\n"
+    python -m http.server \${PORT}
+elif python -c "import SimpleHTTPServer" > /dev/null 2>&1; then
+    echo -e "\nrunning: python -m SimpleHTTPServer \${PORT}\n"
+    python -m SimpleHTTPServer \${PORT}
+else
+    echo -e "\nPython http server module not found\n"
+    exit 1
+fi
+`,
       confirm: false,
     },
 
