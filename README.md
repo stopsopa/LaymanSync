@@ -12,7 +12,7 @@ Also along the way, I found that not all rsync implementations are equal, and wh
 
 So instead of rsync which differ per each OS I've decided to use [rclone](https://rclone.org/).
 
-[ver1.webm](https://github.com/user-attachments/assets/49673824-ed40-4e17-891d-fe541fa8ff0c)
+[ver2.webm](https://github.com/user-attachments/assets/52a463f4-c924-488a-9fa2-6887830afde9)
 
 # Development
 
