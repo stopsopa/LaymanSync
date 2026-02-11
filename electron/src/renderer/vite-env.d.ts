@@ -7,6 +7,7 @@ declare global {
       revealDirectory: (dirPath: string) => void;
       getRcloneVersion: () => Promise<string>;
       openExternal: (url: string) => void;
+      getUserDataPath: () => Promise<string>;
       readJsonSync: (filePath: string) => any;
       writeJsonSync: (filePath: string, data: any) => boolean;
       openDirectory: () => Promise<string | null>;
