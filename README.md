@@ -41,7 +41,7 @@ So here it is. I hope you find it useful.
 # EXTENDED VERSION
 
 > [!CAUTION]
-> There is [alternative extended (bulk) version](https://github.com/stopsopa/LaymanSync/tree/multiple) of this app where we can work with synchronisation of multiple directories at once through config files
+> There is [alternative extended (bulk) version](https://github.com/stopsopa/LaymanSync/tree/multiple#readme) of this app where we can work with synchronisation of multiple directories at once through config files
 
 ## Installation
 
