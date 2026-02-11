@@ -12,6 +12,8 @@ Also along the way, I found that not all rsync implementations are equal, and wh
 
 So instead of rsync which differ per each OS I've decided to use [rclone](https://rclone.org/).
 
+[ver2.webm](https://github.com/user-attachments/assets/52a463f4-c924-488a-9fa2-6887830afde9)
+
 # Development
 
 Project was built pretty much in about 2-3 evenings with some extra tunnig and debugging.
