@@ -2,6 +2,11 @@
 
 A simple, user-friendly, and easy-to-install desktop UI for [rclone](https://rclone.org/).
 
+>
+> [!IMPORTANT]
+> Rclone is a professional tool for synchronizing two directories differentially (only new or changed files), which significantly speeds up copying - especially when done many times periodically.
+>
+
 This tool was created after several friends asked me how to properly back up files to external drives. For non-power users, the simplest approach is to keep all files in a single directory and periodically sync it to an external drive.
 
 In theory, rsync is the ideal solution, but expecting non-technical users to work in a terminal is unrealistic. I looked for GUI frontends for rsync, but found that existing options are either difficult to install, hard to use, or both.
