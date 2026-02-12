@@ -4,7 +4,7 @@ A simple, user-friendly, and easy-to-install desktop UI for [rclone](https://rcl
 
 >
 > [!IMPORTANT]
-> Rclone is a professional tool for synchronizing two directories differentially (only new or changed files), which significantly speeds up copying - especially when done many times periodically.
+> Rclone is a professional tool for synchronizing two directories differentially (only new or changed files), which significantly speeds up copying - especially when done many times periodically against the same directories.
 
 # TLDR
 
