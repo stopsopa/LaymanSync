@@ -8,7 +8,7 @@ A simple, user-friendly, and easy-to-install desktop UI for [rclone](https://rcl
 
 # TLDR
 
-https://stopsopa.github.io/LaymanSync/tldr.html
+Just go [here](https://stopsopa.github.io/LaymanSync/tldr.html)
 
 # Origin and decision chain
 
