@@ -52,7 +52,7 @@ So here it is. I hope you find it useful.
 > There is helper page to assist with choosing right binary for your operating system and architecture: https://stopsopa.github.io/LaymanSync/main/download.html
 > 
 
-... or you can though choose right version of binary manually from [Releases](https://github.com/stopsopa/LaymanSync/releases) page for your operating system [Choose binary](https://github.com/stopsopa/LaymanSync/wiki/Choose-binary)
+... or you can choose right version of binary manually from [Releases](https://github.com/stopsopa/LaymanSync/releases) page for your operating system [Choose binary](https://github.com/stopsopa/LaymanSync/wiki/Choose-binary)
 
 ### Windows
 
