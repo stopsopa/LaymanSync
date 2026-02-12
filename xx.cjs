@@ -33,6 +33,16 @@ cat <<EEE
     http://localhost:4286/
     http://localhost:4286/public/download.html
 
+# ---- maintanance
+Normally when you push changes just follow the pipeline and decide if you want to go all the way to the release
+
+at the end of the pipeline the [branch]/download.html will be generated if release will be triggered
+
+You might though create [branch]/download.html manually:
+
+by triggering workflow "Deploy branches to GitHub Pages" 
+WARNING; be careful though to trigger right branch with correct tag
+
 EEE
 
       `,
