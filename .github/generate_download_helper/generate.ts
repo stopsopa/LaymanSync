@@ -4,6 +4,7 @@
  *
  * call
  * NODE_OPTIONS="" node .github/generate_download_helper/generate.ts 2.1.0 public/download.html
+ * NODE_OPTIONS="" node .github/generate_download_helper/generate.ts v1.1.0 public/download.html
  */
 
 import fs from "fs";
