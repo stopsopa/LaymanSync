@@ -10,7 +10,7 @@ So then I figured that it wouldn't take too much effort to build some simple UI 
 
 Also along the way, I found that not all rsync implementations are equal, and when it comes to cross-OS compatibility, rclone seems to be the better choice in terms of consistency across different operating systems. I really only need a single use case: copying or syncing between two directories.
 
-So instead of rsync which differ per each OS I've decided to use [rclone](https://rclone.org/).
+So instead of rsync which differ per each OS I've decided to use [rclone](https://rclone.org/) and wrap it with simplest possible UI.
 
 [ver1.webm](https://github.com/user-attachments/assets/49673824-ed40-4e17-891d-fe541fa8ff0c)
 
