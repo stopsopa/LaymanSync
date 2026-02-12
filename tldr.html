@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Helper</title>
+    <style>
+      :root {
+        --color-border-default: #d0d7de;
+        --color-canvas-subtle: #f6f8fa;
+        --color-accent-fg: #0969da;
+        --color-fg-muted: #636c76;
+        --color-success-fg: #1a7f37;
+        --color-success-bg: #dafbe1;
+        --color-success-border: rgba(31, 35, 40, 0.15);
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        color: #1f2328;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+      .Box {
+        border: 1px solid var(--color-border-default);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .Box-header {
+        background-color: var(--color-canvas-subtle);
+        padding: 16px;
+        border-bottom: 1px solid var(--color-border-default);
+        font-weight: 600;
+      }
+      .Box-row {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--color-border-default);
+        text-decoration: none;
+        color: inherit;
+        transition: background-color 0.2s;
+      }
+      .Box-row:last-child {
+        border-bottom: 0;
+      }
+      .Box-row:hover {
+        background-color: var(--color-canvas-subtle);
+      }
+      .asset-icon {
+        margin-right: 12px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+      }
+      .asset-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .asset-name {
+        color: var(--color-accent-fg);
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .Box-row:hover .asset-name {
+        text-decoration: underline;
+      }
+      .asset-filename {
+        color: var(--color-fg-muted);
+        font-size: 12px;
+        margin-top: 2px;
+      }
+      .download-icon {
+        color: var(--color-fg-muted);
+        margin-left: 12px;
+      }
+      .badge {
+        display: none;
+        padding: 2px 8px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 2em;
+        margin-left: 8px;
+        border: 1px solid var(--color-success-border);
+      }
+      .badge-recommended {
+        background-color: var(--color-success-bg);
+        color: var(--color-success-fg);
+      }
+      .is-recommended .badge-recommended {
+        display: inline-block;
+      }
+      .is-recommended {
+        background-color: #f0fff4;
+      }
+    </style>
+    <script
+      src="https://cdn.jsdelivr.net/gh/MarketingPipeline/GitHub-Ribbon-Web-Component/dist/github-ribbon-wc.min.js"
+      defer
+    ></script>
+  </head>
+  <body>
+    <h1>Versions to download:</h1>
+    <p>There are two versions to download:</p>
+    <ul>
+      <li><a href="main/download.html">simple - to handle just two directories sync</a></li>
+      <li><a href="multiple/download.html">bulk version - handling multiple pairs to sync one after another (configure once and then use)</a></li>
+    </ul>
+
+
+    <github-ribbon link="https://github.com/stopsopa/LaymanSync" type="right" color="#679d2c">Fork me on GitHub</github-ribbon>
+  </body>
+</html>
