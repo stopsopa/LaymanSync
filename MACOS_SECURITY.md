@@ -5,7 +5,9 @@ When installing **LaymanSync** on macOS, you may see a warning like:
 > “Apple is not able to verify that it is free from malware that could harm your Mac or compromise your privacy.”
 
 
-<img width="259" height="325" alt="Image" src="https://github.com/user-attachments/assets/f959d3a7-0a92-49cd-9e13-e0b71d7dc66c" />
+
+<img width="261" height="254" alt="Image" src="https://github.com/user-attachments/assets/f27ed11d-85ac-482a-88e1-9a938995bee0" />
+
 
 
 ### Why this happens
@@ -33,6 +35,10 @@ Here is how to bypass this warning:
 4. Click **Open Anyway** next to LaymanSync <img width="620" height="781" alt="Image" src="https://github.com/user-attachments/assets/9fe402c9-a1aa-426f-ab76-b762507c8829" />
 
 <img width="260" height="350" alt="Image" src="https://github.com/user-attachments/assets/2c151246-da85-4974-b642-25252bc416ec" />
+
+and then authenticate
+
+<img width="259" height="325" alt="Image" src="https://github.com/user-attachments/assets/f959d3a7-0a92-49cd-9e13-e0b71d7dc66c" />
 
 
 #### Option 3: Remove quarantine flag (advanced users)
