@@ -6,7 +6,8 @@ When installing **LaymanSync** on macOS, you may see a warning like:
 
 
 
-<img width="261" height="254" alt="Image" src="https://github.com/user-attachments/assets/f27ed11d-85ac-482a-88e1-9a938995bee0" />
+<img width="262" height="257" alt="Image" src="https://github.com/user-attachments/assets/c34653a8-f66b-4a85-909c-227614171b65" />
+
 
 
 
