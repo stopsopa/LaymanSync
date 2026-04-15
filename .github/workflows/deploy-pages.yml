@@ -62,8 +62,7 @@ jobs:
           set -x
           BRANCH_NAME="${{ github.ref_name }}"
           mkdir -p "deploy/${BRANCH_NAME}"
-          cp -r public/* "deploy/${BRANCH_NAME}/" 
-          ls -l "deploy/${BRANCH_NAME}/download.html"
+          mv coverage "deploy/${BRANCH_NAME}/"          
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
