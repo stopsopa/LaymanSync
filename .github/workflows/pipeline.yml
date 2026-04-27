@@ -409,7 +409,6 @@ jobs:
           path: |
             electron/release/*.dmg
             electron/release/*.exe
-            electron/release/*.zip
           retention-days: 1
 
       - name: 📢 QA Build Summary (${{ matrix.target }} ${{ matrix.arch }})
