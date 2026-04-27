@@ -180,16 +180,23 @@ jobs:
         working-directory: ./electron
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           DEBUG: electron-builder
         shell: bash
         run: |
           ls -R dist 2>/dev/null || echo "dist not found"
           ls -R dist-electron 2>/dev/null || echo "dist-electron not found"
           if [ "${{ matrix.target }}" = "win" ]; then
-            npx electron-builder --win "--${{ matrix.arch }}" --publish always
+            npx electron-builder --win "--${{ matrix.arch }}" --publish never
           else
-            npx electron-builder --mac "--${{ matrix.arch }}" --publish always
+            npx electron-builder --mac "--${{ matrix.arch }}" --publish never
           fi
+          
+          TAG_NAME=${{ inputs.tag_name || github.ref_name }}
+          echo "Uploading generated assets directly via gh cli to bypass electron-builder cache issues..."
+          # Upload DMGs, EXEs, and blockmaps. --clobber allows overwriting if they exist.
+          gh release upload "$TAG_NAME" release/*.dmg release/*.exe release/*.blockmap release/latest*.yml --clobber || echo "Some assets not found or already uploaded."
+          
           cat <<EOF >> $GITHUB_STEP_SUMMARY
           ### 🏗️ Step B: Packaging Electron App (Publish) (${{ matrix.target }} ${{ matrix.arch }})
           Version published for ${{ matrix.target }} (${{ matrix.arch }}).
@@ -200,6 +207,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           TAG_NAME=${{ inputs.tag_name || github.ref_name }}
           gh release upload $TAG_NAME package.json --clobber
