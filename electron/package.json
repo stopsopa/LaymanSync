@@ -80,6 +80,8 @@
     ],
     "publish": {
       "provider": "github",
+      "owner": "stopsopa",
+      "repo": "LaymanSync",
       "releaseType": "release"
     }
   },
