@@ -60,9 +60,9 @@ jobs:
         run: |
           TAG_NAME=${{ inputs.tag_name || github.ref_name }}
           echo "Creating release for tag: $TAG_NAME"
-          # Check if release exists, if not create it as a draft
+          # Check if release exists, if not create it
           if ! gh release view "$TAG_NAME" &>/dev/null; then
-            gh release create "$TAG_NAME" --title "$TAG_NAME" --notes "Release $TAG_NAME" --draft
+            gh release create "$TAG_NAME" --title "$TAG_NAME" --notes "Release $TAG_NAME"
           else
             echo "Release $TAG_NAME already exists."
           fi
