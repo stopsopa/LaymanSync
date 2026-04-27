@@ -28,22 +28,10 @@ export const list = [
     arch: "x64",
   },
   {
-    label: "MacOS - ARM based (Apple Silicon, M1-M5) - portable",
-    postfix: "-arm64.zip",
-    os: "mac",
-    arch: "arm64",
-  },
-  {
     label: "MacOS - ARM based (Apple Silicon, M1-M5) - installer",
     postfix: "-arm64.dmg",
     os: "mac",
     arch: "arm64",
-  },
-  {
-    label: "MacOS - x64 based (Intel) - portable",
-    postfix: "-x64.zip",
-    os: "mac",
-    arch: "x64",
   },
   {
     label: "MacOS - x64 based (Intel) - installer",
