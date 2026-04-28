@@ -39,3 +39,4 @@
 # Trigger manually
 
 Go to Actions tab -> Build & Release Pipeline -> Click Run workflow.
+It woks the same way when trigered manually or triggered automatically
