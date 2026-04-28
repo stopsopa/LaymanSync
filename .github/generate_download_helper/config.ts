@@ -52,3 +52,4 @@ export const list = [
     arch: "x64",
   },
 ];
+
