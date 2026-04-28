@@ -40,3 +40,7 @@
 
 Go to Actions tab -> Build & Release Pipeline -> Click Run workflow.
 It woks the same way when trigered manually or triggered automatically
+
+# Warning
+
+It seems electron builder might fail, but then try to just run failed github actions again and there is a chance it might work.
